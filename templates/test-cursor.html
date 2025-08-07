@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Target Cursor - Element Expansion Test</title>
+    <link rel="stylesheet" href="/static/css/target-cursor.css">
+</head>
+<body style="background: #111; color: white; font-family: Arial; padding: 50px; min-height: 100vh;">
+
+<h1 style="margin-bottom: 30px;">🎯 Target Cursor - Element Expansion</h1>
+
+<p style="margin-bottom: 40px; color: #ccc;">
+  마우스를 아래 요소들에 올려보세요. Target Cursor가 요소 크기에 맞춰서 확장됩니다.
+</p>
+
+<div style="margin: 30px 0;">
+    <button style="padding: 15px 30px; background: #66fcf1; color: #111; border: none; border-radius: 8px; font-size: 16px; margin: 10px;">Small Button</button>
+    <button style="padding: 20px 60px; background: #4de1d7; color: #111; border: none; border-radius: 8px; font-size: 18px; margin: 10px;">Large Button</button>
+</div>
+
+<div style="margin: 30px 0;">
+    <a href="#" style="color: #66fcf1; font-size: 18px; margin: 0 20px; padding: 10px;">Short Link</a>
+    <a href="#" style="color: #4de1d7; font-size: 18px; margin: 0 20px; padding: 15px 30px; border: 2px dashed #4de1d7; border-radius: 8px;">Much Longer Link Text Here</a>
+</div>
+
+<div style="margin: 30px 0;">
+    <input type="text" placeholder="Small Input" style="padding: 10px; margin: 10px; background: #222; color: white; border: 1px solid #555; border-radius: 4px; width: 200px;">
+    <textarea placeholder="Large Textarea" style="padding: 15px; margin: 10px; background: #222; color: white; border: 1px solid #555; border-radius: 4px; width: 400px; height: 100px; resize: none;"></textarea>
+</div>
+
+<div style="margin: 30px 0;">
+    <div style="display: inline-block; padding: 20px 40px; background: rgba(102, 252, 241, 0.1); border: 2px solid #66fcf1; border-radius: 12px; margin: 10px; cursor: pointer;">
+        Custom Hover Area - Medium
+    </div>
+    <div style="display: inline-block; padding: 30px 80px; background: rgba(77, 225, 215, 0.1); border: 2px solid #4de1d7; border-radius: 12px; margin: 10px; cursor: pointer;">
+        Custom Hover Area - Extra Large Size
+    </div>
+</div>
+
+<script src="/static/js/target-cursor.js"></script>
+
+</body>
+</html>

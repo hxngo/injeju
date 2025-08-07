@@ -1,0 +1,114 @@
+// 비디오 품질 최적화 스크립트
+document.addEventListener('DOMContentLoaded', function() {
+  const video = document.querySelector('.hero-video');
+  
+  if (video) {
+    console.log('🎬 고화질 비디오 최적화 시작...');
+    
+    // 디바이스별 최적 비디오 선택
+    function selectOptimalVideo() {
+      const screenWidth = window.screen.width;
+      const pixelRatio = window.devicePixelRatio || 1;
+      const effectiveWidth = screenWidth * pixelRatio;
+      
+      console.log('📱 디바이스 정보:', {
+        screenWidth,
+        pixelRatio,
+        effectiveWidth
+      });
+      
+      // 고해상도 디스플레이 감지
+      if (effectiveWidth >= 3840) {
+        // 4K 디스플레이
+        updateVideoSource('background_4k.mp4', 'background_hq.webm');
+      } else if (effectiveWidth >= 2560) {
+        // 2K 디스플레이  
+        updateVideoSource('background_2k.mp4', 'background_hq.webm');
+      } else if (effectiveWidth >= 1920) {
+        // Full HD
+        updateVideoSource('background_hq.mp4', 'background_hq.webm');
+      } else {
+        // HD
+        updateVideoSource('background_1080p.mp4', 'background_hq.webm');
+      }
+    }
+    
+    function updateVideoSource(mp4File, webmFile) {
+      const sources = video.querySelectorAll('source');
+      if (sources.length >= 2) {
+        sources[0].src = `/static/images/${mp4File}`;
+        sources[1].src = `/static/images/${webmFile}`;
+        video.load(); // 비디오 다시 로드
+        console.log('📹 비디오 소스 업데이트:', mp4File);
+      }
+    }
+    
+    // 비디오 품질 설정
+    video.addEventListener('loadedmetadata', function() {
+      console.log('📊 비디오 메타데이터 로드됨:', {
+        width: video.videoWidth,
+        height: video.videoHeight,
+        duration: video.duration
+      });
+      
+      // 고화질 설정
+      if (video.videoWidth && video.videoHeight) {
+        // 비디오 원본 해상도 확인
+        const aspectRatio = video.videoWidth / video.videoHeight;
+        const containerWidth = video.offsetWidth;
+        const containerHeight = video.offsetHeight;
+        
+        console.log('🎯 화면 비율 최적화:', {
+          videoAspectRatio: aspectRatio,
+          containerSize: `${containerWidth}x${containerHeight}`
+        });
+      }
+    });
+    
+    // 비디오 로딩 최적화
+    video.addEventListener('loadstart', function() {
+      console.log('⏳ 비디오 로딩 시작...');
+    });
+    
+    video.addEventListener('canplaythrough', function() {
+      console.log('✅ 비디오 완전 로드 완료 - 고화질 재생 준비됨');
+      
+      // 재생 품질 향상을 위한 설정
+      video.style.imageRendering = 'high-quality';
+      video.style.imageRendering = '-webkit-optimize-contrast';
+    });
+    
+    // 에러 처리
+    video.addEventListener('error', function(e) {
+      console.error('❌ 비디오 로드 에러:', e);
+      console.log('🔄 폴백 이미지로 전환 시도...');
+      
+      // 폴백 이미지 표시
+      const fallbackImg = document.createElement('img');
+      fallbackImg.src = '/static/images/video-fallback.jpg';
+      fallbackImg.style.cssText = video.style.cssText;
+      fallbackImg.className = 'hero-video-fallback';
+      video.parentNode.replaceChild(fallbackImg, video);
+    });
+    
+    // 재생 최적화
+    video.addEventListener('play', function() {
+      console.log('▶️ 비디오 재생 시작 - 화질 최적화 적용됨');
+    });
+    
+    // 모바일 대응
+    if (window.innerWidth <= 768) {
+      video.style.filter = 'contrast(1.1) brightness(0.9) saturate(1.1)';
+      console.log('📱 모바일 최적화 필터 적용');
+    }
+    
+    // 고해상도 디스플레이 감지
+    if (window.devicePixelRatio > 1) {
+      video.style.transform = `scale(${1/window.devicePixelRatio}) translateZ(0)`;
+      video.style.transformOrigin = 'top left';
+      video.style.width = `${100 * window.devicePixelRatio}%`;
+      video.style.height = `${100 * window.devicePixelRatio}%`;
+      console.log(`🖥️ 고해상도 디스플레이 최적화 (${window.devicePixelRatio}x)`);
+    }
+  }
+});

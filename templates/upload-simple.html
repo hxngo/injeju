@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Test - CORSS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .upload-area {
+            border: 2px dashed #66fcf1;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background: #333;
+        }
+        .btn {
+            background: #66fcf1;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .file-list {
+            margin-top: 20px;
+        }
+        .file-item {
+            background: #444;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Test Page</h1>
+        <p>이 페이지가 정상적으로 로드되면 기본 템플릿에 문제가 있는 것입니다.</p>
+        
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <p>파일을 선택하거나 여기에 끌어다 놓으세요</p>
+            <button class="btn">파일 선택</button>
+        </div>
+        
+        <input type="file" id="fileInput" multiple style="display: none">
+        <div class="file-list" id="fileList"></div>
+        
+        <button class="btn" style="margin-top: 20px;" onclick="alert('업로드 기능 테스트')">
+            업로드 시작
+        </button>
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            Array.from(e.target.files).forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.textContent = `${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+                fileList.appendChild(div);
+            });
+        });
+        
+        console.log('Simple upload page loaded successfully');
+    </script>
+</body>
+</html>

@@ -1,0 +1,936 @@
+  {% extends "base.html" %}
+  {% block title %}Upload - CORSS{% endblock %}
+  {% block body %}
+  <style>
+  html, body {
+    background: #111f2e;
+    min-height: 100vh;
+    min-width: 100vw;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+  body {
+    opacity: 1; transition: opacity 0.6s cubic-bezier(.5,.04,.27,1);
+  }
+  body.fade-out { opacity: 0; pointer-events:none; }
+  body.fade-in  { opacity: 1; }
+  .bg-blur-img {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 0;
+    object-fit: cover;
+    filter: brightness(0.53) blur(2px) grayscale(8%);
+    pointer-events: none;
+  }
+  .bg-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: linear-gradient(120deg, rgba(20,40,70,0.82) 60%, rgba(10,36,70,0.91) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .navbar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(20, 30, 48, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(102, 252, 241, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    box-sizing: border-box;
+    z-index: 1002;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  }
+  
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    border: none !important;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .navbar-brand img {
+    height: 65px;
+    width: auto;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .navbar-brand img:hover {
+    transform: scale(1.05);
+  }
+  
+  .navbar-links {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 12px;
+    border-radius: 50px;
+    border: 1px solid rgba(102, 252, 241, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-links a {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #c1d9f0;
+    text-decoration: none;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    padding: 12px 20px;
+    border-radius: 25px; 
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    border: 1px solid transparent;
+    box-shadow: none;
+  }
+  
+  .navbar-links a::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.1) 0%, rgba(77, 225, 215, 0.15) 100%);
+    transition: left 0.5s ease;
+    border-radius: 25px;
+  }
+  
+  .navbar-links a:hover::before {
+    left: 0;
+  }
+  
+  .navbar-links a:hover {
+    color: #66fcf1;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.15) 0%, rgba(77, 225, 215, 0.1) 100%);
+    border-color: rgba(102, 252, 241, 0.3);
+    text-shadow: 0 0 15px rgba(102, 252, 241, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 25px rgba(102, 252, 241, 0.2),
+      0 0 0 1px rgba(102, 252, 241, 0.1) inset;
+  }
+  
+  .navbar-links a.active {
+    color: #66fcf1;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.2) 0%, rgba(77, 225, 215, 0.15) 100%);
+    border-color: rgba(102, 252, 241, 0.4);
+    text-shadow: 0 0 20px rgba(102, 252, 241, 0.8);
+    box-shadow: 
+      0 6px 20px rgba(102, 252, 241, 0.3),
+      0 0 0 1px rgba(102, 252, 241, 0.2) inset;
+  }
+
+  .dashboard-main {
+    position: absolute;
+    top: 80px;
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 32px;
+    z-index: 1003;
+    pointer-events: none;
+    box-sizing: border-box;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+  .slot-card {
+    background: #23272e;
+    color: #e4e7ef;
+    border-radius: 0;
+    box-shadow: 0 6px 36px 0 rgba(14, 22, 38, 0.29);
+    min-width: 390px;
+    max-width: 470px;
+    width: 400px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-size: 1.08rem;
+    pointer-events: all;
+    border: 1.5px solid #222937;
+    margin: 0;
+    box-sizing: border-box;
+  }
+  .slot-tabs {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 22px;
+    margin-top: 6px;
+  }
+  .slot-tab-btn {
+    flex: 1 1 0;
+    background: #16181c;
+    color: #8be0ff;
+    font-size: 1.07rem;
+    font-weight: 700;
+    padding: 12px 7px 9px 7px;
+    border: none;
+    outline: none;
+    border-bottom: 3.5px solid transparent;
+    cursor: pointer;
+    border-radius: 9px 9px 0 0;
+    transition: background 0.19s, color 0.19s, border 0.22s;
+    letter-spacing: 0.03em;
+  }
+  .slot-tab-btn.active {
+    background: #23272e;
+    color: #8be0ff;
+    border-bottom: 3.5px solid #8be0ff;
+    box-shadow: 0 3px 18px #00dbff0d;
+    z-index: 2;
+  }
+  .slot-card-inner {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 8px 22px 24px 22px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    box-sizing: border-box;
+  }
+  .slot-section { display: none; }
+  .slot-section.active { display: block; }
+  .slot-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.28rem;
+    font-weight: 800;
+    color: #8be0ff;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid #34415b;
+    padding-bottom: 10px;
+  }
+  .slot-card label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 700;
+    color: #b2cbf6;
+    font-size: 1.01rem;
+    letter-spacing: 0.01em;
+    margin-top: 12px;
+  }
+  .slot-card select, .slot-card input, .slot-card textarea {
+    width: 100%;
+    border: 1.3px solid #364763;
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 1.05rem;
+    background: #1b2026;
+    color: #e6e6ef;
+    margin-bottom: 7px;
+    margin-top: 2px;
+    outline: none;
+    transition: box-shadow 0.13s, border 0.13s;
+  }
+  .slot-card select:focus, .slot-card input:focus, .slot-card textarea:focus {
+    box-shadow: 0 0 0 2px #66fcf144;
+    border-color: #66fcf1;
+  }
+  .middle-card {
+    background: #242832;
+    border-radius: 22px;
+    box-shadow: 0 6px 28px 0 rgba(18,25,45,0.11);
+    min-width: 700px;
+    max-width: 940px;
+    width: 800px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    pointer-events: all;
+    margin: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .middle-img-block {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    height: 350px;
+    justify-content: center;
+    flex: 1 1 0;
+    min-height: 220px;
+    padding: 38px 0 14px 0;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+  }
+
+  /* 로봇 이미지와 SVG 오버레이 스타일 */
+  .robot-image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .robot-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .svg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events:auto;;
+  }
+
+  .svg-overlay svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 클릭 가능한 영역 스타일 */
+  .clickable-part { 
+    fill: transparent;
+    stroke: transparent;
+    cursor: pointer; 
+    pointer-events: all;
+    transition: all 0.4s cubic-bezier(.25,.46,.45,.94);
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  .clickable-part.active {
+  box-shadow: none !important;
+  border-color: inherit !important;
+  fill: inherit !important;
+  stroke: inherit !important;
+  stroke-width: inherit !important;
+  transition: none !important;
+}
+  .clickable-part:hover { 
+    fill: rgba(102, 252, 241, 0.2);
+    stroke: rgba(102, 252, 241, 0.8);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 10px #66fcf1);
+    transform: scale(1.02);
+  }
+
+ 
+
+  /* 디버그 모드용 - 필요시 활성화 */
+  .debug-mode .clickable-part {
+    fill: rgba(255, 0, 0, 0.2);
+    stroke: red;
+    stroke-width: 2;
+  }
+
+
+  .middle-global-block {
+    border-top: 1.5px solid #303848;
+    padding: 25px 22px 14px 22px;
+    background: #21242b;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .middle-global-block label {
+    font-size: 1.10rem;
+    color: #b2cbf6;
+    font-weight: 700;
+    margin-bottom: 7px;
+  }
+  .middle-global-row {
+    display: flex;
+    gap: 13px;
+    margin-bottom: 3px;
+  }
+  .middle-global-block select,
+  .middle-global-block input {
+    border: 1.2px solid #364763;
+    border-radius: 7px;
+    padding: 9px 11px;
+    font-size: 1.06rem;
+    background: #181c22;
+    color: #f0f4fb;
+    flex: 1 1 0;
+    outline: none;
+    transition: box-shadow 0.13s, border 0.13s;
+  }
+  .middle-global-block select:focus,
+  .middle-global-block input:focus {
+    box-shadow: 0 0 0 2px #62d8fd49;
+    border-color: #66fcf1;
+  }
+  .card {
+    background: #262b33;
+    border-radius: 0;
+    box-shadow: 0 6px 30px 0 rgba(18,25,45,0.14);
+    min-width: 290px;
+    max-width: 340px;
+    width: 295px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    pointer-events: all;
+    margin: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 1.5px solid #23272e;
+  }
+  .card-inner {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 35px 32px 32px 32px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    box-sizing: border-box;
+  }
+  .card h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.28rem;
+    font-weight: 800;
+    color: #b2cbf6;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid #34415b;
+    padding-bottom: 9px;
+  }
+  .summary-box {
+    font-size: 1.10rem;
+    color: #d5e4f8;
+    background: #23272e;
+    border-radius: 0;
+    border: 1.3px solid #38405a;
+    padding: 19px 16px;
+    margin-top: 14px;
+    min-height: 100px;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+  }
+  @media (max-width: 1100px) {
+    .dashboard-main {
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      height: auto;
+      min-height: unset;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .slot-card, .middle-card, .card {
+      width: 98vw;
+      max-width: 98vw;
+      min-width: 0;
+      height: auto;
+      min-height: 370px;
+      max-height: unset;
+      margin: 0 0 16px 0;
+      border-radius: 10px !important;
+    }
+    .middle-img-block svg {
+      width: 180px;
+      height: 180px;
+    }
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 5005;
+    left: 0; top: 0; width: 100vw; height: 100vh;
+    background: rgba(20,36,40,0.56);
+    align-items: center; justify-content: center;
+  }
+  .modal-content {
+    background: #23283a;
+    padding: 34px 28px 28px 28px;
+    border-radius: 16px;
+    box-shadow: 0 8px 38px #13293966;
+    min-width: 340px;
+    max-width: 600px;
+    width: 100%; 
+    color: #f6fcff;
+    display: flex; flex-direction: column;
+    gap: 12px;
+    position: relative;
+    animation: modalPop .3s;
+  }
+  @keyframes modalPop {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .modal-close {
+    position: absolute;
+    right: 17px; top: 12px;
+    font-size: 1.7rem;
+    color: #b2e7e0;
+    cursor: pointer;
+    z-index: 10;
+    font-weight: 900;
+    transition: color 0.18s;
+  }
+  .modal-close:hover { color: #f08282; }
+  #modal-title { font-size: 1.2rem; color: #66fcf1; margin-bottom: 8px;}
+  #modal-input {
+    font-size: 1.04rem; border-radius: 6px; border:1.5px solid #34415b;
+    background: #202630; color:#fafcff; padding: 10px; margin-bottom: 2px; resize: vertical;
+    min-height: 52px;
+  }
+  #modal-save {
+    margin-top:10px; padding:8px 12px; background:#66fcf1; border:none; border-radius:6px;
+    font-weight:700; cursor:pointer; font-size: 1.07rem;
+    transition: background 0.2s;
+  }
+  #modal-save:hover { background: #52d8d0; }
+
+  /* 디버그 토글 버튼 */
+  .debug-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: #66fcf1;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 9999;
+    display: none; /* 기본적으로 숨김 */
+  }
+  </style>
+
+
+<img class="bg-blur-img" src="{{ url_for('static', filename='images/back3.jpg') }}">
+<div class="bg-overlay"></div>
+<div class="navbar">
+  <div class="navbar-brand">
+    <img src="{{ url_for('static', filename='images/CORSS_logo_checked.png') }}" alt="CORSS Logo" class="navbar-logo">
+  </div>
+  <div class="navbar-links">
+    <a href="/" class="active">Home</a>
+    <a href="/upload">Upload</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </div>
+</div>
+
+<div class="dashboard-main">
+  <!-- 왼쪽: Slot Control -->
+  <div class="slot-card">
+    <div class="slot-tabs">
+      <button class="slot-tab-btn active" data-tab="control">Action Control</button>
+      <button class="slot-tab-btn" data-tab="style">Style Detail</button>
+    </div>
+    <div class="slot-card-inner">
+      <!-- 동작 컨트롤 - 자동생성 -->
+      <div class="slot-section section-control active">
+        <h3>Slot Control</h3>
+        {% for i in range(1, 17) %}
+          <label for="segment-{{i}}">Segment {{i}}</label>
+          <input type="text" id="segment-{{i}}" placeholder="동작 설명을 입력하세요">
+        {% endfor %}
+      </div>
+      <!-- 스타일 디테일 -->
+      <div class="slot-section section-style">
+        <h3>Style Detail</h3>
+        <label for="color">Color Theme</label>
+        <select id="color">
+          <option>Classic Black</option>
+          <option>Industrial Grey</option>
+          <option>Neon Blue</option>
+        </select>
+        <label for="effect">Effect Preset</label>
+        <select id="effect">
+          <option>Soft Shadow</option>
+          <option>Metallic Glow</option>
+        </select>
+        <label for="detail-notes">Custom Notes</label>
+        <textarea id="detail-notes" placeholder="설정 설명, 스타일 참고사항 등 입력"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 중앙: 로봇 이미지 + 글로벌 세팅 -->
+<div class="middle-card">
+  <div class="middle-img-block" id="robot-area">
+    <div style="position: absolute; top: 12px; right: 18px; z-index: 20;">
+      <button id="zoom-in" style="
+        background: #66fcf1; 
+        color: #000; 
+        border: none; 
+        width: 35px; 
+        height: 35px; 
+        border-radius: 6px; 
+        font-size: 1.35rem; 
+        font-weight: bold; 
+        margin-right: 4px; 
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      " 
+      onmouseover="this.style.background='#4de1d7'" 
+      onmouseout="this.style.background='#66fcf1'">＋</button>
+      <button id="zoom-out" style="
+        background: #66fcf1; 
+        color: #000; 
+        border: none; 
+        width: 35px; 
+        height: 35px; 
+        border-radius: 6px; 
+        font-size: 1.35rem; 
+        font-weight: bold; 
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      "
+      onmouseover="this.style.background='#4de1d7'" 
+      onmouseout="this.style.background='#66fcf1'">－</button>
+    </div>
+    <div class="robot-image-container" id="robot-img-container" style="position: relative;">
+      <img src="{{ url_for('static', filename='images/arm2.png') }}" 
+          alt="Robot Arm" 
+          class="robot-image" 
+          style="width:100%; height:auto; display:block;">
+      <div class="svg-overlay">
+        {% include 'svg/processing_seg_named_parts_linked.svg' %}
+      </div>
+    </div>
+  </div>
+    <!-- 글로벌 세팅 -->
+    <div class="middle-global-block">
+      <label>Global Settings</label>
+      <div class="middle-global-row">
+        <input type="text" value="0.5 m/s">
+        <select><option>factory</option></select>
+      </div>
+      <div class="middle-global-row">
+        <select><option>isometric</option></select>
+        <select><option>isometric</option></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 오른쪽: Final Summary -->
+  <div class="card">
+    <div class="card-inner">
+      <h3>Final Summary</h3>
+      <div class="summary-box" id="summary-box">
+        <!-- segment별 요약 자동 생성됨 -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 모달 -->
+<div class="modal" id="detail-modal">
+  <div class="modal-content">
+    <span class="modal-close" id="modal-close">&times;</span>
+    <h3 id="modal-title">Detail Settings</h3>
+    <textarea id="modal-input" rows="5" placeholder="Enter details for this part..."></textarea>
+    <button id="modal-save">Save</button>
+  </div>
+</div>
+
+<!-- 디버그 모드 토글 버튼 (개발시에만 사용) -->
+<button class="debug-toggle" onclick="toggleDebugMode()">Toggle Debug</button>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. 탭 토글
+    const tabBtns = document.querySelectorAll('.slot-tab-btn');
+    const sections = document.querySelectorAll('.slot-section');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
+        if (btn.dataset.tab === "control") {
+          document.querySelector('.section-control').classList.add('active');
+        } else {
+          document.querySelector('.section-style').classList.add('active');
+        }
+      });
+    });
+  
+    // 2. 모달 변수
+    const modal = document.getElementById('detail-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalInput = document.getElementById('modal-input');
+    let currentTarget = null;
+    let currentPart = null;
+  
+    // 3. SVG 클릭 바인딩 (최초 및 새로 들어올 때마다)
+    function bindSvgEvents() {
+      const overlayObject = document.querySelector('.svg-overlay');
+      if (!overlayObject) {
+        console.log('[DEBUG] .svg-overlay가 없음!');
+        return;
+      }
+      // SVG 내부 clickable-part 디버깅
+      const clickableParts = overlayObject.querySelectorAll('.clickable-part');
+      console.log(`[DEBUG] .svg-overlay 안 clickable-part 개수: ${clickableParts.length}`);
+      clickableParts.forEach(part => {
+        // 기존 핸들러 제거
+        part.onclick = null;
+        part.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // 디버그: 클릭한 path, data-target, 연결된 input
+          const targetId = part.dataset.target;
+          const partName = part.dataset.partName || targetId;
+          const linkedInput = document.getElementById(targetId);
+          console.log('[DEBUG] SVG clicked:', {
+            part: part,
+            dataTarget: targetId,
+            partName: partName,
+            linkedInput: linkedInput
+          });
+  
+          if (currentPart) currentPart.classList.remove('active');
+          part.classList.add('active');
+          currentPart = part;
+  
+          currentTarget = linkedInput;
+          // 입력창 하이라이트 + 모달 표시
+          if (currentTarget) {
+            currentTarget.classList.add('highlight');
+            currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => currentTarget.classList.remove('highlight'), 1400);
+  
+            modalTitle.textContent = `Detail Settings for ${partName}`;
+            modalInput.value = currentTarget.value || "";
+            modal.style.display = 'flex';
+            modalInput.focus();
+          } else {
+            // 디버그: 연결 input 없음
+            console.warn(`[DEBUG] 연결된 input(id="${targetId}")이 존재하지 않음!`);
+          }
+        });
+      });
+  
+      // 추가: data-target과 input id 일치하는지 전체 디버깅
+      clickableParts.forEach(part => {
+        const targetId = part.dataset.target;
+        const inputElem = document.getElementById(targetId);
+        if (!inputElem) {
+          console.warn(`[DEBUG][WARN] SVG path의 data-target="${targetId}"에 해당하는 input이 없음!`);
+        } else {
+          // 일치하는 경우만 출력 (optional)
+          console.log(`[DEBUG] SVG path data-target="${targetId}" <--> input#${targetId} OK`);
+        }
+      });
+    }
+  
+    // 4. svg-overlay 안에 svg 등장 감지 → 클릭 바인딩
+    const overlay = document.querySelector('.svg-overlay');
+    if (overlay) {
+      const observer = new MutationObserver(() => {
+        console.log('[DEBUG] MutationObserver: svg-overlay 자식 변경 감지!');
+        bindSvgEvents();
+      });
+      observer.observe(overlay, { childList: true, subtree: true });
+    }
+  
+    // 5. 최초 한 번 바인딩 시도 (즉시 렌더된 경우 대비)
+    bindSvgEvents();
+  
+    // 6. 모달 닫기
+    document.getElementById('modal-close').onclick = () => {
+      modal.style.display = 'none';
+      if (currentPart) currentPart.classList.remove('active');
+    };
+  
+    // 7. 모달 저장
+    document.getElementById('modal-save').onclick = () => {
+      if (currentTarget) {
+        currentTarget.value = modalInput.value;
+        updateSummary();
+      }
+      modal.style.display = 'none';
+      if (currentPart) currentPart.classList.remove('active');
+    };
+  
+    // 8. 배경 클릭 시 모달 닫기
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+        if (currentPart) currentPart.classList.remove('active');
+      }
+    };
+  
+    // 9. Summary 업데이트 함수 (segment-1~16 자동반영)
+    function updateSummary() {
+      let summary = '';
+      for (let i = 1; i <= 16; i++) {
+        const input = document.getElementById(`segment-${i}`);
+        if (input) summary += `Segment ${i}: ${input.value}<br>`;
+      }
+      document.getElementById('summary-box').innerHTML = summary;
+    }
+  
+    // 10. 입력 변경 시 Summary 갱신 (자동)
+    const inputs = document.querySelectorAll('input[type="text"], textarea');
+    inputs.forEach(input => {
+      input.addEventListener('input', updateSummary);
+    });
+  
+    // 11. 디버그 모드 토글
+    document.querySelector('.debug-toggle')?.addEventListener('click', () => {
+      document.querySelector('.robot-image-container').classList.toggle('debug-mode');
+    });
+  
+    // 12. [휠로 확대/축소 + 드래그 이동(패닝)]
+    let zoom = 1;
+    let posX = 0, posY = 0;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let originX = 0, originY = 0;
+    const robotImgContainer = document.getElementById('robot-img-container');
+
+  function updateTransform() {
+    robotImgContainer.style.transform =
+      `scale(${zoom}) translate(${posX / zoom}px, ${posY / zoom}px)`;
+    robotImgContainer.style.transition = isDragging ? "none" : "transform 0.18s";
+  }
+
+  if (robotImgContainer) {
+    // 휠 줌
+    robotImgContainer.addEventListener('wheel', function(e) {
+      if (e.ctrlKey) return;
+      e.preventDefault();
+      const delta = e.deltaY || e.wheelDeltaY;
+      const oldZoom = zoom;
+      if (delta < 0) {
+        zoom = Math.min(zoom + 0.07, 2.8);
+      } else {
+        zoom = Math.max(zoom - 0.07, 0.5);
+      }
+      // 마우스 위치 중심 줌(선택)
+      // posX와 posY를 마우스 기준으로 보정하려면 아래처럼 쓰면 됨
+      const rect = robotImgContainer.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const zoomDelta = zoom - oldZoom;
+      posX -= (mouseX - posX) * (zoomDelta / zoom);
+      posY -= (mouseY - posY) * (zoomDelta / zoom);
+      updateTransform();
+    }, { passive: false });
+
+    // 드래그 시작
+    robotImgContainer.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      originX = posX;
+      originY = posY;
+      robotImgContainer.style.cursor = 'grabbing';
+    });
+
+    // 드래그 이동
+    window.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      posX = originX + (e.clientX - startX);
+      posY = originY + (e.clientY - startY);
+      updateTransform();
+    });
+
+    // 드래그 종료
+    window.addEventListener('mouseup', function() {
+      if (isDragging) {
+        isDragging = false;
+        robotImgContainer.style.cursor = '';
+        robotImgContainer.style.transition = "transform 0.15s";
+      }
+    });
+
+    // 모바일(터치) 지원: 터치 줌/이동은 필요시 추가
+  }
+  document.addEventListener("DOMContentLoaded", function() {
+  document.body.classList.add("fade-in");
+
+  // React Bits 애니메이션 초기화
+  if (typeof ReactBitsAnimations !== 'undefined') {
+    console.log('Initializing React Bits animations...');
+    
+    // 자동 글로우 효과 적용
+    document.querySelectorAll('.auto-glow').forEach(el => {
+      el.classList.add('glow-text');
+    });
+    
+    // 타이프라이터 효과 적용
+    document.querySelectorAll('.auto-typewriter').forEach(el => {
+      ReactBitsAnimations.typeWriter(el, {
+        speed: 80,
+        cursor: false
+      });
+    });
+    
+    // 리플 효과 적용
+    document.querySelectorAll('.auto-ripple, .btn, button').forEach(btn => {
+      ReactBitsAnimations.addRipple(btn);
+    });
+    
+    // 파티클 배경 생성
+    setTimeout(() => {
+      ReactBitsAnimations.createParticleBackground(document.body, {
+        particleCount: 15,
+        speed: 20,
+        particleColor: 'rgba(102, 252, 241, 0.3)'
+      });
+    }, 500);
+    
+    console.log('React Bits animations initialized');
+  } else {
+    console.warn('ReactBitsAnimations not found');
+  }
+});
+    // 최초 summary 렌더
+    updateSummary();
+
+    // 13. [확대/축소 버튼 이벤트 추가]
+    const zoomInBtn = document.getElementById('zoom-in');
+    const zoomOutBtn = document.getElementById('zoom-out');
+
+    if (zoomInBtn) {
+      zoomInBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        zoom = Math.min(zoom + 0.2, 3.0);
+        updateTransform();
+        console.log('Zoom in:', zoom);
+      });
+    }
+
+    if (zoomOutBtn) {
+      zoomOutBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        zoom = Math.max(zoom - 0.2, 0.3);
+        updateTransform();
+        console.log('Zoom out:', zoom);
+      });
+    }
+  });
+  </script>
+  
+{% endblock %}
+

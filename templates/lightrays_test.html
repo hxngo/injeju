@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}LightRays Test Page{% endblock %}
+
+{% block head_extra %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/LightRays.css') }}">
+{% endblock %}
+
+{% block body %}
+<style>
+  .test-page-container {
+    position: relative;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    background: #111f2e;
+  }
+  .light-rays-container {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 1;
+    overflow: hidden;
+  }
+  .test-content {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    height: 100%;
+  }
+  .test-button {
+    padding: 16px 32px;
+    font-size: 1.25rem;
+    border: none; border-radius: 8px;
+    background: #66fcf1; color: #0f172a;
+    cursor: pointer;
+  }
+</style>
+
+<div class="test-page-container">
+  <!-- LightRays 백그라운드 -->
+  <div id="light-rays" class="light-rays-container"></div>
+
+  <!-- 테스트 버튼 -->
+  <div class="test-content">
+    <button class="test-button" onclick="alert('LightRays is working!')">
+      Test LightRays
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="module">
+    import LightRays from "{{ url_for('static', filename='js/LightRays.js') }}";
+    document.addEventListener("DOMContentLoaded", () => {
+      const container = document.getElementById("light-rays");
+      new LightRays({
+        container,
+        raysOrigin: "top-center",
+        raysColor: "#00ffff",
+        raysSpeed: 1.5,
+        lightSpread: 0.8,
+        rayLength: 1.2,
+        followMouse: true,
+        mouseInfluence: 0.1,
+        noiseAmount: 0.1,
+        distortion: 0.05
+      });
+    });
+  </script>
+{% endblock %}

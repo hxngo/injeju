@@ -1,0 +1,125 @@
+/* TargetCursor React Component - Original Design */
+
+.target-cursor-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  transform: translate(-50%, -50%);
+  /* GPU 가속 최적화 */
+  will-change: transform;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.target-cursor-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.target-cursor-corner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border: 3px solid #fff;
+  will-change: transform;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 코너별 기본 위치 */
+.corner-tl {
+  transform: translate(-150%, -150%);
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-tr {
+  transform: translate(50%, -150%);
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-br {
+  transform: translate(50%, 50%);
+  border-left: none;
+  border-top: none;
+}
+
+.corner-bl {
+  transform: translate(-150%, 50%);
+  border-right: none;
+  border-top: none;
+}
+
+/* 요소 크기에 맞춰서 확장된 상태 */
+.target-cursor-wrapper.expanded .target-cursor-dot {
+  transform: translate(-50%, -50%);
+}
+
+.target-cursor-wrapper.expanded .corner-tl {
+  transform: translate(-50%, -50%);
+}
+
+.target-cursor-wrapper.expanded .corner-tr {
+  transform: translate(-50%, -50%);
+}
+
+.target-cursor-wrapper.expanded .corner-br {
+  transform: translate(-50%, -50%);
+}
+
+.target-cursor-wrapper.expanded .corner-bl {
+  transform: translate(-50%, -50%);
+}
+
+/* 모바일에서는 숨김 */
+@media (max-width: 768px) {
+  .target-cursor-wrapper {
+    display: none !important;
+  }
+}
+
+/* 성능 최적화를 위한 reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .target-cursor-wrapper,
+  .target-cursor-dot,
+  .target-cursor-corner {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .target-cursor-dot {
+    background: #ffffff !important;
+  }
+  
+  .target-cursor-corner {
+    border-color: #ffffff !important;
+  }
+}
+
+/* 커서 타겟 요소들 스타일 */
+.cursor-target {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.cursor-target:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 252, 241, 0.2);
+}

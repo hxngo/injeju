@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}STAI Safe{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap & FullPage.js -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullpage.js/dist/fullpage.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  
+  <!-- React Bits Style Animations -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/react-bits-animations.css') }}">
+  
+  <!-- Target Cursor CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/target-cursor.css') }}">
+  
+  <!-- Metallic Paint CSS (Lite Version) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/metallic-paint-lite.css') }}">
+
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: #111f2e !important;
+      color: #f0f6ff;
+      min-height: 100vh;
+      height: 100%;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* Ultra-Modern Navigation Styles */
+    .navbar {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 60px;
+      background: linear-gradient(135deg, 
+        rgba(15, 23, 42, 0.85) 0%, 
+        rgba(30, 41, 59, 0.90) 50%,
+        rgba(15, 23, 42, 0.95) 100%);
+      backdrop-filter: blur(40px) saturate(200%);
+      border-bottom: 1px solid rgba(102, 252, 241, 0.08);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 50px; z-index: 1000;
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.15),
+        0 1px 0 rgba(255, 255, 255, 0.03) inset,
+        0 0 100px rgba(102, 252, 241, 0.02);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .navbar::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, 
+        rgba(102, 252, 241, 0.03) 0%, 
+        transparent 50%, 
+        rgba(77, 225, 215, 0.02) 100%);
+      pointer-events: none;
+    }
+
+    .navbar-brand {
+      display: flex; 
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      transform: perspective(1000px) rotateX(0deg);
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .navbar-brand:hover {
+      transform: perspective(1000px) rotateX(-2deg) translateY(-1px);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, 
+        #66fcf1 0%, 
+        #4de1d7 25%, 
+        #3ed1c7 50%,
+        #2dd4c7 75%,
+        #1cc7c7 100%);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.2rem; 
+      font-weight: 900;
+      letter-spacing: 3px;
+      animation: gradient-shift 8s ease-in-out infinite;
+      text-shadow: 0 0 30px rgba(102, 252, 241, 0.3);
+    }
+
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: rgba(195, 217, 240, 0.7);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: -5px;
+      opacity: 0.8;
+    }
+
+    .navbar-links {
+      position: relative;
+    }
+
+    .nav-wrapper {
+      display: flex; 
+      align-items: center; 
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 2px 8px;
+      border-radius: 25px;
+      border: 1px solid rgba(102, 252, 241, 0.08);
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, 
+        rgba(102, 252, 241, 0.05) 0%, 
+        transparent 50%, 
+        rgba(77, 225, 215, 0.03) 100%);
+      pointer-events: none;
+      border-radius: 60px;
+    }
+
+    .nav-bg-blur {
+      position: absolute;
+      top: -10px; left: -10px; right: -10px; bottom: -10px;
+      background: radial-gradient(circle at center, 
+        rgba(102, 252, 241, 0.03) 0%, 
+        transparent 70%);
+      filter: blur(20px);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .nav-wrapper:hover .nav-bg-blur {
+      opacity: 1;
+    }
+
+    .nav-link {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 4px 12px;
+      text-decoration: none;
+      border-radius: 15px;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      cursor: pointer;
+      transform: perspective(1000px) rotateX(0deg);
+    }
+
+    .nav-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(195, 217, 240, 0.75);
+      letter-spacing: 0.5px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .nav-indicator {
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%) scaleX(0);
+      width: 16px;
+      height: 1.5px;
+      background: linear-gradient(90deg, #66fcf1, #4de1d7);
+      border-radius: 1px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 8px rgba(102, 252, 241, 0.6);
+    }
+
+    /* Hover Effects - Ultra-Refined Interactions */
+    .nav-link:hover {
+      background: linear-gradient(135deg, 
+        rgba(102, 252, 241, 0.08) 0%, 
+        rgba(77, 225, 215, 0.05) 100%);
+      border: 1px solid rgba(102, 252, 241, 0.15);
+      transform: perspective(1000px) rotateX(-3deg) translateY(-3px);
+      box-shadow: 
+        0 15px 35px rgba(102, 252, 241, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-link:hover .nav-text {
+      color: #66fcf1;
+      text-shadow: 0 0 10px rgba(102, 252, 241, 0.3);
+      transform: translateY(-1px);
+      font-weight: 700;
+    }
+
+    .nav-link:hover .nav-indicator {
+      transform: translateX(-50%) scaleX(1);
+      box-shadow: 0 0 15px rgba(102, 252, 241, 0.8);
+    }
+
+    /* Active State - Current Page Display */
+    .nav-link.active {
+      background: linear-gradient(135deg, 
+        rgba(102, 252, 241, 0.12) 0%, 
+        rgba(77, 225, 215, 0.08) 100%);
+      border: 1px solid rgba(102, 252, 241, 0.2);
+      box-shadow: 
+        0 8px 25px rgba(102, 252, 241, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-link.active .nav-text {
+      color: #66fcf1;
+      text-shadow: 0 0 15px rgba(102, 252, 241, 0.5);
+      font-weight: 700;
+      animation: gentle-pulse 3s ease-in-out infinite;
+    }
+
+    .nav-link.active .nav-indicator {
+      transform: translateX(-50%) scaleX(1);
+      background: linear-gradient(90deg, #66fcf1, #4de1d7, #66fcf1);
+      background-size: 200% 100%;
+      animation: indicator-flow 2s ease-in-out infinite;
+      box-shadow: 0 0 20px rgba(102, 252, 241, 1);
+    }
+
+    @keyframes gentle-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes indicator-flow {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* Click Animation */
+    .nav-link:active {
+      transform: perspective(1000px) rotateX(-1deg) translateY(1px) scale(0.98);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 900px) {
+      .navbar {
+        padding: 0 25px;
+        height: 50px;
+      }
+      
+      .gradient-text {
+        font-size: 1.6rem;
+      }
+      
+      .brand-subtitle {
+        font-size: 0.6rem;
+      }
+      
+      .nav-wrapper {
+        gap: 2px;
+        padding: 2px 6px;
+      }
+      
+      .nav-link {
+        padding: 3px 8px;
+      }
+      
+      .nav-text {
+        font-size: 0.7rem;
+      }
+    }
+
+    .section {
+      display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+      min-height: 100vh; padding: 80px 20px 60px;
+      transition: background 0.4s;
+      width: 100vw;
+      opacity: 1;  /* 기본: 보임 */
+      transition: opacity 0.7s cubic-bezier(.52,.1,.41,.95);
+      pointer-events: auto;
+    }
+    .section.fade-out {
+      opacity: 0 !important;
+      pointer-events: none;
+      transition: opacity 0.7s cubic-bezier(.52,.1,.41,.95);
+    }
+    .section.fade-in {
+      opacity: 1 !important;
+      transition: opacity 0.7s cubic-bezier(.52,.1,.41,.95);
+    }
+    #home { background: radial-gradient(ellipse at 60% 45%, #2b67ad40 20%, #16293d 100%), #111f2e; color: #eaf9ff; }
+    #about { background: linear-gradient(120deg, #161b23 70%, #1e2432 100%); color: #bed4f7; }
+    #upload { background: linear-gradient(120deg, #182f42 60%, #202f4a 100%); color: #f3fcff; }
+    #contact { background: linear-gradient(100deg, #151820 85%, #17253e 100%); color: #9bc9eb; }
+    .section h1 { font-size: 2.6rem; font-weight: 900; margin-bottom: 22px; letter-spacing: 1px; }
+    .section p { font-size: 1.22rem; font-weight: 500; color: #b9d1e9; margin-bottom: 26px; }
+    .fade-btn { margin-top: 30px; background: #257ae7; color: #fff; font-weight: 700; padding: 14px 28px; border-radius: 8px; border: none; cursor: pointer; transition: background 0.19s;}
+    .fade-btn:hover { background: #50e4f7; color: #111;}
+    @media (max-width: 900px) {
+      .navbar { padding: 0 12px; }
+      .section { padding: 90px 4vw 48px; }
+      .navbar-brand .gradient-text { font-size: 1.4rem;}
+      .navbar-brand .plain-text { font-size: 1.3rem;}
+      .section h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="navbar-brand">
+      <img src="{{ url_for('static', filename='images/CORSS_logo_checked.png') }}" 
+           alt="CORSS Logo" 
+           class="metallic-logo-navbar"
+           data-metallic-logo>
+      <div class="brand-subtitle">Simulation Studio</div>
+    </div>
+    <div class="navbar-links">
+      <div class="nav-wrapper">
+        <a href="#home" class="nav-link active" data-menuanchor="home">
+          <span class="nav-text">Home</span>
+          <div class="nav-indicator"></div>
+        </a>
+        <a href="#upload" class="nav-link" data-menuanchor="upload">
+          <span class="nav-text">Upload</span>
+          <div class="nav-indicator"></div>
+        </a>
+        <a href="#about" class="nav-link" data-menuanchor="about">
+          <span class="nav-text">About</span>
+          <div class="nav-indicator"></div>
+        </a>
+        <a href="#contact" class="nav-link" data-menuanchor="contact">
+          <span class="nav-text">Contact</span>
+          <div class="nav-indicator"></div>
+        </a>
+      </div>
+      <div class="nav-bg-blur"></div>
+    </div>
+  </div>
+
+  {% block body %}
+  <div id="fullpage">
+    <div class="section" id="home">
+      <h1>홈 섹션</h1>
+      <p>STAI Safe: 차세대 AI 안전 플랫폼의 새로운 시작</p>
+      <button class="fade-btn" id="go-about">About으로</button>
+    </div>
+    <div class="section" id="about">
+      <h1>소개 섹션</h1>
+      <p>About 페이지 내용이 여기에 들어갑니다.</p>
+      <button class="fade-btn" id="go-upload">Upload로</button>
+    </div>
+    <div class="section" id="upload">
+      <h1>업로드 섹션</h1>
+      <p>Upload 페이지 내용(파일 업로드 등) 여기에 구현.</p>
+      <button class="fade-btn" id="go-contact">Contact로</button>
+    </div>
+    <div class="section" id="contact">
+      <h1>연락처 섹션</h1>
+      <p>Contact info, 문의 폼 등 구성.</p>
+      <button class="fade-btn" id="go-home">Home으로</button>
+    </div>
+  </div>
+  {% endblock %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullpage.js/dist/fullpage.min.js"></script>
+  
+  <!-- React Bits Animations -->
+  <script src="{{ url_for('static', filename='js/react-bits-animations.js') }}"></script>
+  
+  <!-- React Bits Target Cursor -->
+  <script src="{{ url_for('static', filename='js/react-bits-target-cursor.js') }}"></script>
+  
+  <!-- Metallic Paint Effect (Lite Version) -->
+  <script src="{{ url_for('static', filename='js/metallic-paint-lite.js') }}"></script>
+  
+  <!-- Initialize Lucide Icons -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Lucide Icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  </script>
+  
+  <script>
+    // 페이드 전환 기능 (fullPage.js와 결합)
+    function fadeSection(fromIdx, toIdx, next) {
+      const sections = document.querySelectorAll('.section');
+      if (fromIdx !== undefined && sections[fromIdx]) {
+        sections[fromIdx].classList.add('fade-out');
+        setTimeout(() => {
+          sections[fromIdx].classList.remove('fade-out');
+          if (next) next();
+        }, 680); // CSS와 맞춤
+      } else if (next) {
+        next();
+      }
+      if (toIdx !== undefined && sections[toIdx]) {
+        sections[toIdx].classList.add('fade-in');
+        setTimeout(() => {
+          sections[toIdx].classList.remove('fade-in');
+        }, 680);
+      }
+    }
+
+    // fullPage.js 초기화 (라이센스 키 추가)
+    document.addEventListener("DOMContentLoaded", function() {
+      // FullPage.js가 있는 경우에만 실행
+      if (typeof fullpage !== 'undefined' && document.getElementById('fullpage')) {
+        try {
+          new fullpage('#fullpage', {
+            licenseKey: 'gplv3-license', // GPL 라이센스로 무료 사용
+            autoScrolling: true,
+            anchors: ['homepage', 'aboutpage', 'uploadpage', 'contactpage'], // ID 충돌 방지를 위해 변경
+            menu: '.navbar-links',
+            navigation: true,
+            scrollingSpeed: 700,
+            onLeave: function(origin, destination, direction) {
+          // origin.index, destination.index
+          fadeSection(origin.index, destination.index, () => {
+            // fullpage 기본 전환 이후에 필요 시 추가 처리
+          });
+        },
+        afterLoad: function(origin, destination) {
+          document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+          const nav = document.querySelector(`.nav-link[data-menuanchor="${destination.anchor}"]`);
+          if(nav) nav.classList.add('active');
+        }
+        });
+        console.log('FullPage.js 초기화 성공');
+      } catch (error) {
+        console.warn('FullPage.js 초기화 실패:', error);
+      }
+    } else {
+      console.log('FullPage.js 또는 #fullpage 요소 없음');
+    }
+
+      // 버튼으로 이동 시 페이드+섹션 전환 (안전한 처리)
+      const goAbout = document.getElementById('go-about');
+      const goUpload = document.getElementById('go-upload');
+      const goContact = document.getElementById('go-contact');
+      const goHome = document.getElementById('go-home');
+      
+      if (goAbout) {
+        goAbout.onclick = function() {
+          if (window.fullpage_api) {
+            fadeSection(0, 1, () => fullpage_api.moveTo('about'));
+          }
+        };
+      }
+      
+      if (goUpload) {
+        goUpload.onclick = function() {
+          if (window.fullpage_api) {
+            fadeSection(1, 2, () => fullpage_api.moveTo('upload'));
+          }
+        };
+      }
+      
+      if (goContact) {
+        goContact.onclick = function() {
+          if (window.fullpage_api) {
+            fadeSection(2, 3, () => fullpage_api.moveTo('contact'));
+          }
+        };
+      }
+      
+      if (goHome) {
+        goHome.onclick = function() {
+          if (window.fullpage_api) {
+            fadeSection(3, 0, () => fullpage_api.moveTo('home'));
+          }
+        };
+      }
+    });
+  </script>
+</body>
+</html>
+        font-size: 1.8rem;
+      }
+      
+      .brand-subtitle {
+        font-size: 0.65rem;
+      }
+      
+      .nav-wrapper {
+        gap: 8px;
+        padding: 6px 12px;
+      }
+      
+      .nav-link {
+        padding: 10px 14px;
+      }
+      
+      .nav-icon {
+        font-size: 1rem;
+      }
+      
+      .nav-text {
+        font-size: 0.75rem;
+      }
+    }
+
+    .plain-text { 
+      color: #e2f4ff; font-weight: 900; font-size: 2.0rem;
+      text-shadow: 0 0 20px rgba(226, 244, 255, 0.3);
+    }

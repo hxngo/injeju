@@ -1,0 +1,215 @@
+/* React App Demo Styles */
+
+.app {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f0f6ff;
+  font-family: 'Inter', sans-serif;
+}
+
+.demo-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.demo-title {
+  font-size: 3rem;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #66fcf1 0%, #4de1d7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.demo-subtitle {
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 60px;
+  color: #94a3b8;
+}
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+/* Demo Buttons */
+.demo-btn {
+  padding: 16px 32px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+}
+
+.demo-btn.primary {
+  background: linear-gradient(135deg, #66fcf1 0%, #4de1d7 100%);
+  color: #0f172a;
+}
+
+.demo-btn.secondary {
+  background: rgba(102, 252, 241, 0.1);
+  color: #66fcf1;
+  border: 1px solid rgba(102, 252, 241, 0.3);
+}
+
+.demo-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(102, 252, 241, 0.3);
+}
+
+/* Demo Cards */
+.demo-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(102, 252, 241, 0.1);
+  border-radius: 16px;
+  padding: 30px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(10px);
+}
+
+.demo-card:hover {
+  border-color: rgba(102, 252, 241, 0.3);
+  background: rgba(15, 23, 42, 0.9);
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(102, 252, 241, 0.2);
+}
+
+.demo-card h3 {
+  margin: 0 0 15px 0;
+  color: #66fcf1;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.demo-card p {
+  margin: 0;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+/* Demo Link */
+.demo-link {
+  display: inline-block;
+  padding: 12px 24px;
+  color: #66fcf1;
+  text-decoration: none;
+  border: 1px solid rgba(102, 252, 241, 0.3);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.demo-link:hover {
+  background: rgba(102, 252, 241, 0.1);
+  border-color: #66fcf1;
+  transform: translateY(-2px);
+}
+
+/* Demo Input */
+.demo-input {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(102, 252, 241, 0.2);
+  border-radius: 12px;
+  color: #f0f6ff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.demo-input:focus {
+  outline: none;
+  border-color: #66fcf1;
+  box-shadow: 0 0 20px rgba(102, 252, 241, 0.2);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.demo-input::placeholder {
+  color: #64748b;
+}
+
+/* Large Interactive Area */
+.demo-large {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(102, 252, 241, 0.05) 0%, rgba(77, 225, 215, 0.02) 100%);
+  border: 1px solid rgba(102, 252, 241, 0.1);
+  border-radius: 20px;
+  padding: 60px 40px;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.demo-large:hover {
+  background: linear-gradient(135deg, rgba(102, 252, 241, 0.08) 0%, rgba(77, 225, 215, 0.04) 100%);
+  border-color: rgba(102, 252, 241, 0.2);
+  transform: scale(1.02);
+  box-shadow: 0 20px 50px rgba(102, 252, 241, 0.15);
+}
+
+.demo-large h2 {
+  margin: 0 0 20px 0;
+  font-size: 2rem;
+  color: #66fcf1;
+}
+
+.demo-large p {
+  margin: 10px 0;
+  font-size: 1.1rem;
+  color: #cbd5e1;
+}
+
+/* Demo Info Section */
+.demo-info {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(102, 252, 241, 0.1);
+  border-radius: 16px;
+  padding: 40px;
+  backdrop-filter: blur(10px);
+}
+
+.demo-info h3 {
+  margin: 0 0 20px 0;
+  color: #66fcf1;
+  font-size: 1.5rem;
+}
+
+.demo-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.demo-info li {
+  padding: 8px 0;
+  color: #cbd5e1;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .demo-title {
+    font-size: 2rem;
+  }
+  
+  .demo-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .demo-container {
+    padding: 40px 15px;
+  }
+  
+  .demo-large {
+    padding: 40px 20px;
+  }
+}

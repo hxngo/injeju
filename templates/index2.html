@@ -1,0 +1,781 @@
+{% extends "base.html" %}
+{% block title %}Upload - CORSS Enhanced{% endblock %}
+{% block body %}
+<!-- Lucide 아이콘 스크립트 임시 주석 처리 -->
+<!-- <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script> -->
+<style>
+  html, body {
+    background: #111f2e;
+    min-height: 100vh;
+    min-width: 100vw;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+  body {
+    opacity: 0;
+    transition: opacity 0.6s cubic-bezier(.5,.04,.27,1);
+  }
+  body.fade-out { opacity: 0; pointer-events:none; }
+  body.fade-in  { opacity: 1; }
+  
+  .bg-blur-img {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 0;
+    object-fit: cover;
+    filter: brightness(0.53) blur(2px) grayscale(8%);
+    pointer-events: none;
+  }
+  .bg-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: linear-gradient(120deg, rgba(20,40,70,0.82) 60%, rgba(10,36,70,0.91) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  .navbar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(20, 30, 48, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(102, 252, 241, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    box-sizing: border-box;
+    z-index: 1002;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  }
+  
+  .navbar-brand img {
+    height: 65px;
+    width: auto;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .navbar-brand img:hover {
+    transform: scale(1.05);
+  }
+  
+  .navbar-links {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 12px;
+    border-radius: 50px;
+    border: 1px solid rgba(102, 252, 241, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-links a {
+    font-weight: 600; font-size: 0.95rem; color: #c1d9f0;
+    text-decoration: none; cursor: pointer; 
+    padding: 12px 20px;
+    border-radius: 25px; 
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    border: 1px solid transparent;
+  }
+  
+  .navbar-links a::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.1) 0%, rgba(77, 225, 215, 0.15) 100%);
+    transition: left 0.5s ease;
+    border-radius: 25px;
+  }
+  
+  .navbar-links a:hover::before {
+    left: 0;
+  }
+  
+  .navbar-links a:hover, .navbar-links a.active {
+    color: #66fcf1;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.15) 0%, rgba(77, 225, 215, 0.1) 100%);
+    border-color: rgba(102, 252, 241, 0.3);
+    text-shadow: 0 0 15px rgba(102, 252, 241, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 25px rgba(102, 252, 241, 0.2),
+      0 0 0 1px rgba(102, 252, 241, 0.1) inset;
+  }
+  
+  .navbar-links a.active {
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.2) 0%, rgba(77, 225, 215, 0.15) 100%);
+    border-color: rgba(102, 252, 241, 0.4);
+    text-shadow: 0 0 20px rgba(102, 252, 241, 0.8);
+    box-shadow: 
+      0 6px 20px rgba(102, 252, 241, 0.3),
+      0 0 0 1px rgba(102, 252, 241, 0.2) inset;
+  }
+  
+  .upload-wrapper {
+    display: flex;
+    position: absolute;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 80px);
+    z-index: 1003;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideInUp 0.8s ease-out 0.3s forwards;
+  }
+  
+  @keyframes slideInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .file-panel {
+    width: 30%;
+    background: rgba(30,35,45,0.95);
+    border-right: 1.5px solid #23272e;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    backdrop-filter: blur(10px);
+    border-radius: 0 0 0 20px;
+  }
+  
+  .file-panel h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #8be0ff;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(139, 224, 255, 0.3);
+  }
+  
+  /* Enhanced File Drop Zone */
+  .file-drop {
+    flex: 0 0 auto;
+    border: 2px dashed #8be0ff;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #1b2028, #252b35);
+    padding: 40px 20px;
+    text-align: center;
+    color: #d5e4f8;
+    cursor: pointer;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(.25,.46,.45,.94);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  
+  .file-drop::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(102, 252, 241, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  
+  .file-drop:hover::before {
+    opacity: 1;
+  }
+  
+  .file-drop:hover {
+    background: linear-gradient(145deg, #202630, #2a3440);
+    border-color: #66fcf1;
+    transform: scale(1.02);
+    box-shadow: 0 8px 30px rgba(102, 252, 241, 0.2);
+  }
+  
+  .file-drop.dragover {
+    border-color: #4de1d7;
+    background: linear-gradient(145deg, #2a3440, #34424f);
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(102, 252, 241, 0.3);
+  }
+  
+  .file-drop.dragover::before {
+    opacity: 1;
+  }
+  
+  /* Enhanced file upload button */
+  #file-btn {
+    background: linear-gradient(45deg, #66fcf1, #4de1d7);
+    color: #111;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 252, 241, 0.3);
+  }
+  
+  #file-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 252, 241, 0.4);
+  }
+  
+  .file-list {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+  }
+  
+  .file-item {
+    background: linear-gradient(145deg, #a3a7b084, #8a9bb0aa);
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #f2f4f7;
+    transition: all 0.3s cubic-bezier(.25,.46,.45,.94);
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .file-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+  }
+  
+  .file-item:hover {
+    background: linear-gradient(145deg, #2f3745, #3a4553);
+    border-color: #66fcf1;
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(102, 252, 241, 0.2);
+  }
+  
+  .file-item:hover::before {
+    left: 100%;
+  }
+  
+  .preview-panel {
+    flex: 1;
+    background: rgba(20,24,30,0.9);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+    backdrop-filter: blur(10px);
+    border-radius: 0 0 20px 0;
+  }
+  
+  .preview-header {
+    font-size: 1rem;
+    color: #a5b4d4;
+    margin-bottom: 12px;
+    text-align: center;
+    font-weight: 500;
+    text-shadow: 0 0 5px rgba(165, 180, 212, 0.3);
+  }
+  
+  .preview-display {
+    flex: 1;
+    background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
+    border: 1.5px solid #23272e;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 4px 20px rgba(0,0,0,0.5);
+  }
+  
+  .preview-display img, .preview-display video {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+  }
+  
+  .preview-display img:hover, .preview-display video:hover {
+    transform: scale(1.02);
+  }
+  
+  /* Enhanced prompt input */
+  .prompt-input {
+    margin-top: 20px;
+    width: 100%;
+    border: 1.3px solid #364763;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 1.05rem;
+    background: linear-gradient(145deg, #1b2026, #252832);
+    color: #e6e6ef;
+    outline: none;
+    transition: all 0.3s cubic-bezier(.25,.46,.45,.94);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  
+  .prompt-input:focus {
+    box-shadow: 0 0 0 3px rgba(102, 252, 241, 0.3), 0 4px 20px rgba(102, 252, 241, 0.2);
+    border-color: #66fcf1;
+    background: linear-gradient(145deg, #202832, #2a3440);
+  }
+  
+  /* Enhanced upload button */
+  .upload-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 16px;
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: #111;
+    background: linear-gradient(45deg, #66fcf1, #4de1d7);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(.25,.46,.45,.94);
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(102, 252, 241, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .upload-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+  }
+  
+  .upload-btn:hover {
+    background: linear-gradient(45deg, #4de1d7, #3ed1c7);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(102, 252, 241, 0.4);
+  }
+  
+  .upload-btn:hover::before {
+    left: 100%;
+  }
+  
+  .upload-btn:active {
+    transform: translateY(-1px);
+  }
+  
+  .upload-btn.loading {
+    background: #999;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .upload-wrapper {
+      flex-direction: column;
+    }
+    
+    .file-panel {
+      width: 100%;
+      max-height: 40vh;
+    }
+    
+    .preview-panel {
+      flex: 1;
+    }
+  }
+</style>
+
+<img class="bg-blur-img" src="{{ url_for('static', filename='images/back3.jpg') }}">
+<div class="bg-overlay"></div>
+<!-- LightRays background container -->
+<div id="light-rays" class="light-rays-container"></div>
+
+<div class="navbar">
+  <div class="navbar-brand">
+    <img src="{{ url_for('static', filename='images/CORSS_logo_checked.png') }}" alt="CORSS Logo" class="navbar-logo">
+  </div>
+  <div class="navbar-links">
+    <a href="/">Home</a>
+    <a href="/upload" class="active">Upload</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </div>
+</div>
+
+<div class="upload-wrapper">
+  <!-- Enhanced Left Panel: Files -->
+  <div class="file-panel">
+    <h3 class="auto-glow"><i data-lucide="folder" style="width: 20px; height: 20px; margin-right: 8px;"></i> Files</h3>
+    <div class="file-drop" id="file-drop">
+      <div style="font-size: 1.1rem; margin-bottom: 15px;">
+        <span style="color: #66fcf1;"><i data-lucide="upload" style="width: 20px; height: 20px;"></i></span> 여기에 파일이나 폴더 끌어다 놓기
+      </div>
+      <div style="margin: 15px 0; color: #aaa;">또는</div>
+      <button id="file-btn" class="auto-ripple"><i data-lucide="paperclip" style="width: 16px; height: 16px; margin-right: 6px;"></i> 파일 추가</button>
+      <input type="file" id="file-input" style="display:none" multiple accept="image/*,video/*,.pdf,.txt,.csv,.json">
+    </div>
+    <div class="file-list" id="file-list"></div>
+  </div>
+
+  <!-- Enhanced Right Panel: Preview -->
+  <div class="preview-panel">
+    <div class="preview-header auto-typewriter"><i data-lucide="search" style="width: 20px; height: 20px; margin-right: 8px;"></i> 작업 시작을 위한 리소스를 준비하세요</div>
+    <div class="preview-display" id="preview-display">
+      <div style="text-align: center; color: #777; padding: 40px;">
+        <div style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"><i data-lucide="clipboard" style="width: 48px; height: 48px;"></i></div>
+        <p>파일을 선택하면 미리보기가 여기에 표시됩니다</p>
+        <small style="color: #555;">지원 형식: 이미지, 비디오, 문서</small>
+      </div>
+    </div>
+    
+    <!-- Enhanced Prompt Input -->
+    <div class="prompt-input-container" style="position: relative; margin: 20px 0;">
+      <div style="display: flex; align-items: center; margin-bottom: 8px; color: #66fcf1;">
+        <i data-lucide="bot" style="width: 18px; height: 18px; margin-right: 8px;"></i>
+        <span style="font-weight: 600;">AI 작업 지시사항</span>
+      </div>
+      <input 
+        type="text" 
+        class="prompt-input" 
+        id="prompt-input"
+        placeholder="예: 로봇 팔이 상자를 선반에 올려놔"
+        maxlength="200"
+      >
+      <div style="text-align: right; font-size: 0.8rem; color: #666; margin-top: 5px;">
+        <span id="char-count">0</span>/200
+      </div>
+    </div>
+    
+    <!-- Enhanced Upload Button -->
+    <a href="/processing" class="upload-btn page-link auto-ripple" id="start-btn">
+      <span id="btn-text"><i data-lucide="rocket" style="width: 18px; height: 18px; margin-right: 8px;"></i> Start Predict</span>
+      <div class="loader-enhanced" id="btn-loader" style="display: none; width: 20px; height: 20px; margin: 0 auto;"></div>
+    </a>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize elements
+  const fileInput = document.getElementById('file-input');
+  const fileBtn = document.getElementById('file-btn');
+  const fileDrop = document.getElementById('file-drop');
+  const fileList = document.getElementById('file-list');
+  const previewDisplay = document.getElementById('preview-display');
+  const promptInput = document.getElementById('prompt-input');
+  const charCount = document.getElementById('char-count');
+  const startBtn = document.getElementById('start-btn');
+  
+  let uploadedFiles = [];
+
+  // Enhanced file operations
+  fileBtn.addEventListener('click', () => {
+    fileInput.click();
+    fileBtn.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      fileBtn.style.transform = 'scale(1)';
+    }, 150);
+  });
+
+  // Enhanced drag and drop
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    fileDrop.addEventListener(eventName, preventDefaults, false);
+    document.body.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    fileDrop.addEventListener(eventName, () => {
+      fileDrop.classList.add('dragover');
+    }, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    fileDrop.addEventListener(eventName, () => {
+      fileDrop.classList.remove('dragover');
+    }, false);
+  });
+
+  fileDrop.addEventListener('drop', handleDrop, false);
+  fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    handleFiles(files);
+    
+    fileDrop.style.animation = 'pulse 0.6s ease-out';
+    setTimeout(() => {
+      fileDrop.style.animation = '';
+    }, 600);
+  }
+
+  function handleFiles(files) {
+    [...files].forEach((file, index) => {
+      setTimeout(() => {
+        const listItem = document.createElement('div');
+        listItem.className = 'file-item';
+        listItem.innerHTML = `
+          <span style="display: inline-block; margin-right: 8px;"><i data-lucide="file-text" style="width: 16px; height: 16px;"></i></span>
+          <span>${file.name}</span>
+          <small style="float: right; color: #999;">${formatFileSize(file.size)}</small>
+        `;
+        
+        listItem.style.opacity = '0';
+        listItem.style.transform = 'translateX(-20px)';
+        fileList.appendChild(listItem);
+        
+        setTimeout(() => {
+          listItem.style.transition = 'all 0.3s ease';
+          listItem.style.opacity = '1';
+          listItem.style.transform = 'translateX(0)';
+        }, 50);
+        
+        listItem.addEventListener('click', () => {
+          document.querySelectorAll('.file-item').forEach(item => {
+            item.classList.remove('active');
+            item.style.backgroundColor = '';
+          });
+          
+          listItem.classList.add('active');
+          listItem.style.backgroundColor = 'rgba(102, 252, 241, 0.2)';
+          previewFile(file);
+        });
+        
+        uploadedFiles.push(file);
+        updateStartButton();
+      }, index * 200);
+    });
+  }
+
+  function previewFile(file) {
+    const url = URL.createObjectURL(file);
+    let element;
+    
+    previewDisplay.style.opacity = '0';
+    previewDisplay.style.transform = 'scale(0.95)';
+    
+    setTimeout(() => {
+      if (file.type.startsWith('video/')) {
+        element = document.createElement('video');
+        element.src = url;
+        element.controls = true;
+        element.style.maxWidth = '100%';
+        element.style.maxHeight = '100%';
+      } else if (file.type.startsWith('image/')) {
+        element = document.createElement('img');
+        element.src = url;
+        element.style.maxWidth = '100%';
+        element.style.maxHeight = '100%';
+        element.style.objectFit = 'contain';
+      } else {
+        element = document.createElement('div');
+        element.innerHTML = `
+          <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 3rem; margin-bottom: 15px;"><i data-lucide="file-text" style="width: 48px; height: 48px;"></i></div>
+            <h3 style="color: #66fcf1; margin-bottom: 10px;">${file.name}</h3>
+            <p style="color: #ccc;">파일 크기: ${formatFileSize(file.size)}</p>
+            <small style="color: #999;">미리보기를 지원하지 않는 파일 형식입니다.</small>
+          </div>
+        `;
+      }
+      
+      previewDisplay.innerHTML = '';
+      previewDisplay.appendChild(element);
+      
+      previewDisplay.style.transition = 'all 0.3s ease';
+      previewDisplay.style.opacity = '1';
+      previewDisplay.style.transform = 'scale(1)';
+    }, 200);
+  }
+
+  // Enhanced prompt input
+  promptInput.addEventListener('input', function() {
+    const length = this.value.length;
+    charCount.textContent = length;
+    
+    if (length > 180) {
+      charCount.style.color = '#ff6b6b';
+    } else if (length > 150) {
+      charCount.style.color = '#ffd93d';
+    } else {
+      charCount.style.color = '#666';
+    }
+    
+    updateStartButton();
+  });
+
+  function updateStartButton() {
+    const hasFiles = uploadedFiles.length > 0;
+    const hasPrompt = promptInput.value.trim().length > 0;
+    
+    if (hasFiles && hasPrompt) {
+      startBtn.classList.remove('loading');
+      startBtn.style.opacity = '1';
+      startBtn.style.pointerEvents = 'auto';
+    } else {
+      startBtn.style.opacity = '0.6';
+      startBtn.style.pointerEvents = 'none';
+    }
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Enhanced page transitions
+  document.querySelectorAll('.page-link').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const href = btn.getAttribute('href');
+      
+      const btnText = document.getElementById('btn-text');
+      const btnLoader = document.getElementById('btn-loader');
+      
+      btnText.style.display = 'none';
+      btnLoader.style.display = 'block';
+      btn.classList.add('loading');
+      
+      document.body.classList.remove('fade-in');
+      document.body.classList.add('fade-out');
+      
+      setTimeout(function() {
+        window.location.href = href;
+      }, 800);
+    });
+  });
+
+  // Initialize page
+  document.body.classList.add("fade-in");
+  
+  // Add particle background
+  setTimeout(() => {
+    if (window.ReactBitsAnimations) {
+      ReactBitsAnimations.createParticleBackground(document.body, {
+        particleCount: 20,
+        speed: 25,
+        particleColor: 'rgba(102, 252, 241, 0.4)'
+      });
+    }
+  }, 500);
+  
+  updateStartButton();
+});
+</script>
+
+<!-- LightRays init script -->
+<!-- 
+<script src="{{ url_for('static', filename='js/LightRays.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Mount LightRays into #light-rays
+    const container = document.getElementById('light-rays');
+    if (window.LightRays) {
+      new LightRays({
+        container,
+        raysOrigin: 'top-center',
+        raysColor: '#00ffff',
+        raysSpeed: 1.5,
+        lightSpread: 0.8,
+        rayLength: 1.2,
+        followMouse: true,
+        mouseInfluence: 0.1,
+        noiseAmount: 0.1,
+        distortion: 0.05
+      });
+    }
+  });
+</script>
+-->
+
+<script>
+console.log('Upload page loading...');
+
+// React Bits 애니메이션 초기화
+if (typeof ReactBitsAnimations !== 'undefined') {
+  console.log('Initializing React Bits animations...');
+  
+  // 자동 글로우 효과 적용
+  document.querySelectorAll('.auto-glow').forEach(el => {
+    el.classList.add('glow-text');
+  });
+  
+  // 타이프라이터 효과 적용
+  document.querySelectorAll('.auto-typewriter').forEach(el => {
+    ReactBitsAnimations.typeWriter(el, {
+      speed: 80,
+      cursor: false
+    });
+  });
+  
+  // 리플 효과 적용
+  document.querySelectorAll('.auto-ripple, .btn, button').forEach(btn => {
+    ReactBitsAnimations.addRipple(btn);
+  });
+  
+  // 파티클 배경 생성 (페이지가 완전히 로드된 후)
+  setTimeout(() => {
+    ReactBitsAnimations.createParticleBackground(document.body, {
+      particleCount: 20,
+      speed: 25,
+      particleColor: 'rgba(102, 252, 241, 0.4)'
+    });
+  }, 500);
+  
+  console.log('React Bits animations initialized');
+} else {
+  console.warn('ReactBitsAnimations not found');
+}
+
+// Initialize Lucide icons - simplified
+/*
+  lucide.createIcons();
+  
+  // Re-initialize icons when new content is added
+  const observer = new MutationObserver(() => {
+    lucide.createIcons();
+  });
+  
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+*/
+
+console.log('Upload page loaded successfully');
+</script>
+{% endblock %}

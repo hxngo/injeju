@@ -1,0 +1,554 @@
+{% extends "base.html" %}
+{% block title %}CORSS - Enhanced{% endblock %}
+{% block body %}
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; overflow: hidden;
+  }
+  body {
+    opacity: 1; transition: opacity 0.6s cubic-bezier(.5,.04,.27,1);
+  }
+  body.fade-out { opacity: 0; pointer-events:none; }
+  body.fade-in  { opacity: 1; }
+
+  .navbar {
+    background: linear-gradient(135deg, rgba(20, 30, 48, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(102, 252, 241, 0.1);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 80px; z-index: 9999;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.05) inset;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  
+  .navbar-brand img { height: 65px; cursor: pointer; transition: transform 0.3s ease; }
+  .navbar-brand img:hover { transform: scale(1.05); }
+  .navbar-logo { height: 85px; width: auto; }
+  
+  .navbar-links { 
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 12px;
+    border-radius: 50px;
+    border: 1px solid rgba(102, 252, 241, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-links a { 
+    font-weight: 600; font-size: 0.95rem; color: #c1d9f0;
+    text-decoration: none; cursor: pointer; 
+    padding: 12px 20px;
+    border-radius: 25px; 
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    border: 1px solid transparent;
+  }
+  
+  .navbar-links a::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.1) 0%, rgba(77, 225, 215, 0.15) 100%);
+    transition: left 0.5s ease;
+    border-radius: 25px;
+  }
+  
+  .navbar-links a:hover::before {
+    left: 0;
+  }
+  
+  .navbar-links a:hover { 
+    color: #66fcf1;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.15) 0%, rgba(77, 225, 215, 0.1) 100%);
+    border-color: rgba(102, 252, 241, 0.3);
+    text-shadow: 0 0 15px rgba(102, 252, 241, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 25px rgba(102, 252, 241, 0.2),
+      0 0 0 1px rgba(102, 252, 241, 0.1) inset;
+  }
+  
+  .navbar-links a.active {
+    color: #66fcf1;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.2) 0%, rgba(77, 225, 215, 0.15) 100%);
+    border-color: rgba(102, 252, 241, 0.4);
+    text-shadow: 0 0 20px rgba(102, 252, 241, 0.8);
+    box-shadow: 
+      0 6px 20px rgba(102, 252, 241, 0.3),
+      0 0 0 1px rgba(102, 252, 241, 0.2) inset;
+  }
+
+  #slide-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+  .section {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+    padding: 0;
+    background-color: white;
+    opacity: 0; visibility: hidden;
+    transform: translateY(100px);
+    transition: opacity 1s, visibility 1s, transform 1s;
+    z-index: 0;
+  }
+  .section.active {
+    opacity: 1; visibility: visible; transform: translateY(0); z-index: 1;
+  }
+  
+  /* Enhanced slide animations */
+  .section.slide-down-in {
+    opacity: 1; visibility: visible;
+    transform: translateY(100vh);
+    animation: slideDownInEnhanced 0.8s cubic-bezier(.25,.46,.45,.94) forwards;
+    z-index: 2;
+  }
+  .section.slide-up-in {
+    opacity: 1; visibility: visible;
+    transform: translateY(-100vh);
+    animation: slideUpInEnhanced 0.8s cubic-bezier(.25,.46,.45,.94) forwards;
+    z-index: 2;
+  }
+  @keyframes slideDownInEnhanced {
+    0% { transform: translateY(100vh) scale(0.8); opacity: 0.8; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  @keyframes slideUpInEnhanced {
+    0% { transform: translateY(-100vh) scale(0.8); opacity: 0.8; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  .hero {
+    color: white; background-color: black; overflow: hidden;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: stretch; justify-content: center; position: relative;
+  }
+  .hero .overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+    background: radial-gradient(circle at 30% 50%, rgba(102, 252, 241, 0.1) 0%, rgba(0,0,0,0.7) 70%);
+    z-index: 1;
+  }
+  .hero-content {
+    z-index: 2;
+    position: relative;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 80px);
+    min-height: 520px;
+    gap: 0.25rem;
+    margin-bottom: 0;
+  }
+  .hero-content .tagline {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #bbbbbb;
+    margin-bottom: 0.2rem;
+  }
+  .hero-content h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    margin-bottom: 1.1rem;
+    color: white;
+    line-height: 1.1;
+  }
+  .hero-content p {
+    font-size: 1.3rem;
+    margin-bottom: 0.7rem;
+    font-weight: 500;
+    color: white;
+  }
+  
+  /* Enhanced Button with React Bits style */
+  .btn-enhanced {
+    padding: 12px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(45deg, #444, #666);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    margin-top: 0.3rem;
+    margin-bottom: 0;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(.25,.46,.45,.94);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  
+  .btn-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.6s ease;
+  }
+  
+  .btn-enhanced:hover {
+    background: linear-gradient(45deg, #66fcf1, #4de1d7);
+    color: #111;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(102, 252, 241, 0.4);
+  }
+  
+  .btn-enhanced:hover::before {
+    left: 100%;
+  }
+  
+  .footer-inline {
+    position: absolute; left: 0; right: 0; bottom: 25px; text-align: center;
+    font-size: 0.85rem; color: #fff;
+    z-index: 2; opacity: 0.8;
+  }
+  .hero-video {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    
+    /* 🎯 즉시 적용되는 화질 개선 - 더 강력한 필터 */
+    filter: brightness(1.03) contrast(1.12) saturate(1.2) hue-rotate(0deg) blur(0px);
+    
+    /* GPU 가속 및 렌더링 최적화 */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    will-change: transform;
+    
+    /* 고해상도 렌더링 */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    
+    /* 브라우저별 최적화 */
+    -webkit-transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    
+    /* 고급 렌더링 설정 */
+    perspective: 1000px;
+    transform-origin: center center;
+    /* GPU 가속 활성화 */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    /* 시각적 개선 필터 (blur 제거) */
+    filter: contrast(1.15) brightness(0.8) saturate(1.2);
+    /* 부드러운 스케일링 */
+    -webkit-filter: contrast(1.15) brightness(0.8) saturate(1.2);
+  }
+  
+  /* Enhanced title animations */
+  #animated-title {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: white;
+    text-align: center;
+    transition: opacity 1s, transform 1s;
+  }
+  .fade-out { opacity: 0; transform: translateY(-20px);}
+  #animated-title.thin-text { font-weight: 400; font-size: 2.8rem; line-height: 1.5; }
+  
+  /* Challenge section enhanced */
+  .challenge-section .challenge-content {
+    margin-top: 90px;
+    color: #222;
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border-radius: 24px;
+    box-shadow: 
+      0 20px 60px rgba(20,30,55,0.1),
+      0 8px 30px rgba(102, 252, 241, 0.1);
+    padding: 44px 40px;
+    max-width: 700px;
+    width: 100%;
+    border: 1px solid rgba(102, 252, 241, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .challenge-section .challenge-content::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(102, 252, 241, 0.05) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(180deg); }
+  }
+  
+  .challenge-section h2 {
+    color: #2481e4;
+    font-size: 2.2rem;
+    margin-bottom: 22px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Scroll indicator enhanced */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.1rem;
+    color: #aef;
+    animation: bounce 2s infinite;
+    z-index: 2;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+    40% { transform: translateX(-50%) translateY(-10px); }
+    60% { transform: translateX(-50%) translateY(-5px); }
+  }
+</style>
+
+<div class="navbar">
+  <div class="navbar-brand">
+    <img src="{{ url_for('static', filename='images/CORSS_logo_checked.png') }}" 
+         alt="CORSS Logo" 
+         class="metallic-logo-navbar"
+         data-metallic-logo>
+    <div class="brand-subtitle">Simulation Studio</div>
+  </div>
+  <div class="navbar-links">
+    <div class="nav-wrapper">
+      <a href="/" class="nav-link active">
+        <span class="nav-text">Home</span>
+        <div class="nav-indicator"></div>
+      </a>
+      <a href="/upload" class="nav-link">
+        <span class="nav-text">Upload</span>
+        <div class="nav-indicator"></div>
+      </a>
+      <a href="/about" class="nav-link">
+        <span class="nav-text">About</span>
+        <div class="nav-indicator"></div>
+      </a>
+      <a href="/contact" class="nav-link">
+        <span class="nav-text">Contact</span>
+        <div class="nav-indicator"></div>
+      </a>
+    </div>
+    <div class="nav-bg-blur"></div>
+  </div>
+</div>
+
+<div id="slide-container">
+  <!-- Home Section with Enhanced Animations -->
+  <div class="section hero active" id="home">
+    <!-- Background Image (비디오 대신 이미지 사용) -->
+    <img src="{{ url_for('static', filename='images/back3.jpg') }}" 
+         alt="Background" 
+         class="hero-video"
+         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
+    </video>
+    <div class="overlay"></div>
+    <div class="hero-content">
+      <div class="tagline auto-typewriter">From Prompt to Real Simulation</div>
+      <h1 id="animated-title" class="auto-split-text">COSMOS Oriented <br> Robot Simulation Studio</h1>
+      <p class="auto-glow">AI-Powered Multi-Agent Planning and Execution</p>
+      <button class="btn-enhanced auto-ripple" id="get-started-btn">Get Started</button>
+      
+      <div class="scroll-indicator">↓ Scroll Down for Demo</div>
+    </div>
+    <div class="footer-inline">&copy; 2025 CORSS. All rights reserved.</div>
+  </div>
+  
+  <!-- Challenge Section Enhanced -->
+  <div class="section challenge-section" id="challenge">
+    <div class="challenge-content">
+      <h2 class="auto-glow">Challenge Demo</h2>
+      <p>Experience the future of robot simulation with our AI-powered multi-agent system. Watch as complex tasks are broken down and executed with precision.</p>
+      <div style="margin: 20px 0;">
+        <div class="progress-enhanced" style="height: 12px; margin: 10px 0;">
+          <div class="progress-fill" style="width: 75%;"></div>
+        </div>
+        <small style="color: #666;">Demo Progress: 75% Complete</small>
+      </div>
+      <button class="btn-enhanced auto-ripple" id="back-to-home-btn" style="margin-top:22px;">Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Enhanced Hero 텍스트 애니메이션
+  const heroSets = [
+    {
+      layout: "full",
+      tagline: "From Prompt to Real Simulation",
+      title: "COSMOS Oriented<br>Robot Simulation Studio",
+      desc: "AI-Powered Multi-Agent Planning and Execution",
+      className: ""
+    },
+    {
+      layout: "title-only",
+      tagline: "차세대 로봇 시뮬레이션",
+      title: "멀티에이전트로 재정의하는<br>시뮬레이션 너머, 현실을 설계하다",
+      desc: "Redefining Reality Through Simulation",
+      className: "thin-text"
+    },
+    {
+      layout: "full",
+      tagline: "Advanced AI Integration",
+      title: "Real-time Collaborative<br>Robot Intelligence",
+      desc: "Seamless Human-AI-Robot Interaction",
+      className: ""
+    }
+  ];
+
+  let heroIndex = 0;
+  const taglineElement = document.querySelector(".hero-content .tagline");
+  const titleElement = document.getElementById("animated-title");
+  const descElement = document.querySelector(".hero-content p");
+
+  function updateHeroContent() {
+    // Fade out current content
+    [taglineElement, titleElement, descElement].forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(-20px)';
+    });
+
+    setTimeout(() => {
+      heroIndex = (heroIndex + 1) % heroSets.length;
+      const current = heroSets[heroIndex];
+
+      // Update content
+      taglineElement.innerHTML = current.tagline;
+      titleElement.innerHTML = current.title;
+      descElement.innerHTML = current.desc;
+
+      // Apply new styles
+      titleElement.className = current.className + ' auto-split-text';
+      taglineElement.style.display = current.layout === "title-only" && !current.tagline ? "none" : "block";
+      descElement.style.display = current.layout === "title-only" && !current.desc ? "none" : "block";
+
+      // Re-apply split text animation
+      if (window.ReactBitsAnimations) {
+        ReactBitsAnimations.splitText(titleElement, { delay: 0.2, stagger: 0.03 });
+      }
+
+      // Fade in new content
+      setTimeout(() => {
+        [taglineElement, titleElement, descElement].forEach(el => {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        });
+      }, 100);
+    }, 500);
+  }
+
+  // Auto-rotate hero content
+  setInterval(updateHeroContent, 4000);
+
+  // Enhanced 슬라이딩 섹션 전환
+  const homeSec = document.getElementById("home");
+  const challSec = document.getElementById("challenge");
+  let isChallenge = false;
+  let animating = false;
+
+  window.addEventListener("wheel", (e) => {
+    if (animating) return;
+    if (!isChallenge && e.deltaY > 60) {
+      // Home → Challenge (slide down)
+      animating = true;
+      homeSec.classList.remove("active");
+      challSec.classList.add("slide-down-in");
+      
+      // Add particle effect
+      if (window.ReactBitsAnimations) {
+        ReactBitsAnimations.createParticleBackground(challSec, {
+          particleCount: 20,
+          speed: 15,
+          particleColor: '#66fcf1'
+        });
+      }
+      
+      setTimeout(() => {
+        challSec.classList.remove("slide-down-in");
+        challSec.classList.add("active");
+        animating = false;
+        isChallenge = true;
+      }, 800);
+    } else if (isChallenge && e.deltaY < -60) {
+      // Challenge → Home (slide up)
+      animating = true;
+      challSec.classList.remove("active");
+      homeSec.classList.add("slide-up-in");
+      setTimeout(() => {
+        homeSec.classList.remove("slide-up-in");
+        homeSec.classList.add("active");
+        animating = false;
+        isChallenge = false;
+      }, 800);
+    }
+  });
+
+  // Enhanced 버튼 클릭 이벤트
+  document.getElementById("get-started-btn").onclick = function () {
+    // Add loading state
+    this.innerHTML = '<div class="loader-enhanced" style="width: 20px; height: 20px; margin: 0 auto;"></div>';
+    this.disabled = true;
+    
+    setTimeout(() => {
+      homeSec.style.animation = 'fadeOutScale 0.6s ease-in-out forwards';
+      setTimeout(function() {
+        window.location.href = "/upload";
+      }, 600);
+    }, 800);
+  };
+
+  // Challenge에서 Back to Home (enhanced)
+  document.getElementById("back-to-home-btn").onclick = function () {
+    if (!animating && isChallenge) {
+      animating = true;
+      challSec.classList.remove("active");
+      homeSec.classList.add("slide-up-in");
+      setTimeout(() => {
+        homeSec.classList.remove("slide-up-in");
+        homeSec.classList.add("active");
+        animating = false;
+        isChallenge = false;
+      }, 800);
+    }
+  };
+
+  // Add entrance animation
+  document.body.classList.add("fade-in");
+  
+  // Initialize particle background for home section (Performance Optimized)
+  setTimeout(() => {
+    if (window.ReactBitsAnimations && window.innerWidth > 768) {
+      ReactBitsAnimations.createParticleBackground(homeSec, {
+        particleCount: 8,  // Reduced particles
+        speed: 20,         // Slower speed
+        particleColor: 'rgba(102, 252, 241, 0.4)'
+      });
+    }
+  }, 2000); // Delayed start
+});
+</script>
+{% endblock %}

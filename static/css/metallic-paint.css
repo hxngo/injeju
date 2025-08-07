@@ -1,0 +1,331 @@
+/* 🎨 React Bits Style Metallic Paint Effect */
+
+.metallic-logo-container {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.metallic-logo {
+  position: relative;
+  display: block;
+  filter: 
+    contrast(1.4) 
+    brightness(1.1) 
+    saturate(0.8)
+    drop-shadow(0 0 20px rgba(102, 252, 241, 0.3));
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: metallic-pulse 4s ease-in-out infinite;
+}
+
+/* 🌊 Liquid Metal Animation */
+.metallic-logo::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle at 30% 70%, rgba(102, 252, 241, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 70% 30%, rgba(77, 225, 215, 0.3) 0%, transparent 50%),
+    linear-gradient(45deg, 
+      rgba(102, 252, 241, 0.1) 0%, 
+      rgba(77, 225, 215, 0.15) 25%,
+      rgba(52, 211, 153, 0.1) 50%,
+      rgba(34, 197, 94, 0.15) 75%,
+      rgba(102, 252, 241, 0.1) 100%);
+  background-size: 150% 150%, 120% 120%, 300% 300%;
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+  animation: 
+    metallic-flow 8s linear infinite,
+    metallic-ripple 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ✨ Metallic Shimmer Effect */
+.metallic-logo::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.3) 20%,
+    rgba(102, 252, 241, 0.4) 50%,
+    rgba(255, 255, 255, 0.3) 80%,
+    transparent 100%);
+  transform: skewX(-20deg);
+  animation: metallic-shimmer 3s linear infinite;
+  pointer-events: none;
+}
+
+/* 🎭 Hover State Enhancement */
+.metallic-logo-container:hover .metallic-logo {
+  filter: 
+    contrast(1.6) 
+    brightness(1.3) 
+    saturate(1.2)
+    drop-shadow(0 0 30px rgba(102, 252, 241, 0.6))
+    drop-shadow(0 0 60px rgba(77, 225, 215, 0.3));
+  transform: scale(1.05) translateY(-2px);
+  animation-duration: 2s;
+}
+
+.metallic-logo-container:hover .metallic-logo::before {
+  opacity: 0.9;
+  animation-duration: 4s, 3s;
+}
+
+.metallic-logo-container:hover .metallic-logo::after {
+  animation-duration: 1.5s;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.5) 15%,
+    rgba(102, 252, 241, 0.7) 50%,
+    rgba(255, 255, 255, 0.5) 85%,
+    transparent 100%);
+}
+
+/* 🌈 Advanced Gradient Mapping */
+.metallic-logo-advanced {
+  position: relative;
+  mask: url('/static/images/CORSS_logo_checked.png') no-repeat center;
+  mask-size: contain;
+  -webkit-mask: url('/static/images/CORSS_logo_checked.png') no-repeat center;
+  -webkit-mask-size: contain;
+  background: 
+    linear-gradient(135deg,
+      #1e3a8a 0%,    /* Deep Blue */
+      #3b82f6 15%,   /* Blue */
+      #06b6d4 30%,   /* Cyan */
+      #10b981 45%,   /* Emerald */
+      #22d3ee 60%,   /* Light Cyan */
+      #66fcf1 75%,   /* Aqua */
+      #4de1d7 90%,   /* Teal */
+      #1e3a8a 100%   /* Deep Blue */
+    );
+  background-size: 400% 400%;
+  animation: 
+    metallic-gradient-shift 6s ease-in-out infinite,
+    metallic-scale-pulse 4s ease-in-out infinite;
+}
+
+/* 💎 Refraction Effect */
+.metallic-refraction {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(ellipse at 25% 25%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% 75%, rgba(102, 252, 241, 0.2) 0%, transparent 50%);
+  mix-blend-mode: soft-light;
+  opacity: 0.6;
+  animation: metallic-refraction 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 🎯 Keyframe Animations */
+@keyframes metallic-pulse {
+  0%, 100% { 
+    filter: 
+      contrast(1.4) 
+      brightness(1.1) 
+      saturate(0.8)
+      drop-shadow(0 0 20px rgba(102, 252, 241, 0.3));
+  }
+  50% { 
+    filter: 
+      contrast(1.5) 
+      brightness(1.2) 
+      saturate(1.0)
+      drop-shadow(0 0 25px rgba(102, 252, 241, 0.4));
+  }
+}
+
+@keyframes metallic-flow {
+  0% { 
+    background-position: 0% 0%, 0% 0%, 0% 0%; 
+    transform: rotate(0deg) scale(1);
+  }
+  33% { 
+    background-position: 50% 50%, 30% 70%, 100% 0%; 
+    transform: rotate(120deg) scale(1.1);
+  }
+  66% { 
+    background-position: 100% 100%, 70% 30%, 200% 100%; 
+    transform: rotate(240deg) scale(0.9);
+  }
+  100% { 
+    background-position: 0% 0%, 0% 0%, 300% 0%; 
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes metallic-ripple {
+  0%, 100% { 
+    opacity: 0.7; 
+    transform: scale(1) translate(0, 0);
+  }
+  25% { 
+    opacity: 0.9; 
+    transform: scale(1.05) translate(-2px, -2px);
+  }
+  50% { 
+    opacity: 0.6; 
+    transform: scale(0.95) translate(2px, 2px);
+  }
+  75% { 
+    opacity: 0.8; 
+    transform: scale(1.02) translate(-1px, 1px);
+  }
+}
+
+@keyframes metallic-shimmer {
+  0% { 
+    left: -100%; 
+    opacity: 0;
+  }
+  10% { 
+    opacity: 1;
+  }
+  90% { 
+    opacity: 1;
+  }
+  100% { 
+    left: 100%; 
+    opacity: 0;
+  }
+}
+
+@keyframes metallic-gradient-shift {
+  0%, 100% { 
+    background-position: 0% 50%;
+    transform: rotate(0deg);
+  }
+  25% { 
+    background-position: 100% 0%;
+    transform: rotate(90deg);
+  }
+  50% { 
+    background-position: 100% 100%;
+    transform: rotate(180deg);
+  }
+  75% { 
+    background-position: 0% 100%;
+    transform: rotate(270deg);
+  }
+}
+
+@keyframes metallic-scale-pulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.02) rotate(180deg); }
+}
+
+@keyframes metallic-refraction {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: translate(0, 0) scale(1);
+  }
+  33% { 
+    opacity: 0.8;
+    transform: translate(2px, -2px) scale(1.02);
+  }
+  66% { 
+    opacity: 0.4;
+    transform: translate(-2px, 2px) scale(0.98);
+  }
+}
+
+/* 📱 Mobile Optimizations */
+@media (max-width: 768px) {
+  .metallic-logo::before,
+  .metallic-logo::after {
+    animation-duration: 6s, 4s;
+  }
+  
+  .metallic-logo-container:hover .metallic-logo {
+    transform: scale(1.02) translateY(-1px);
+  }
+}
+
+/* 🔥 Performance Optimizations */
+.metallic-logo,
+.metallic-logo::before,
+.metallic-logo::after,
+.metallic-refraction {
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* 🎛️ Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .metallic-logo,
+  .metallic-logo::before,
+  .metallic-logo::after,
+  .metallic-logo-advanced,
+  .metallic-refraction {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .metallic-logo-container:hover .metallic-logo {
+    transform: none !important;
+  }
+}
+
+/* 🎨 Custom Logo Variants */
+.metallic-logo-navbar {
+  height: 65px;
+  width: auto;
+}
+
+.metallic-logo-hero {
+  height: 120px;
+  width: auto;
+}
+
+.metallic-logo-footer {
+  height: 40px;
+  width: auto;
+  opacity: 0.8;
+}
+
+/* 🌟 Special Effects */
+.metallic-logo-container.premium {
+  position: relative;
+}
+
+.metallic-logo-container.premium::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background: 
+    radial-gradient(circle at center, 
+      rgba(102, 252, 241, 0.1) 0%, 
+      transparent 70%);
+  animation: premium-glow 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes premium-glow {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}

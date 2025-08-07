@@ -1,0 +1,71 @@
+/* Target Cursor Styles */
+.target-cursor-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  transform: translate(-50%, -50%);
+}
+
+.target-cursor-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.target-cursor-corner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border: 3px solid #fff;
+  will-change: transform;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+}
+
+.corner-tl {
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-tr {
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-br {
+  border-left: none;
+  border-top: none;
+}
+
+.corner-bl {
+  border-right: none;
+  border-top: none;
+}
+
+/* Hide default cursor */
+body {
+  cursor: none !important;
+}
+
+/* Target elements styling */
+.cursor-target {
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.cursor-target:hover {
+  transform: scale(1.02);
+}

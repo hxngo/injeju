@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Page Improvements Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f0f6ff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #66fcf1 0%, #4de1d7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .demo-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(102, 252, 241, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .demo-card:hover {
+            border-color: rgba(102, 252, 241, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(102, 252, 241, 0.1);
+        }
+
+        .demo-card h3 {
+            color: #66fcf1;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .demo-card p {
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* Enhanced Drop Zone */
+        .enhanced-dropzone {
+            border: 2px dashed rgba(102, 252, 241, 0.3);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enhanced-dropzone::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 252, 241, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .enhanced-dropzone:hover::before {
+            opacity: 1;
+        }
+
+        .enhanced-dropzone:hover {
+            border-color: #66fcf1;
+            background: rgba(102, 252, 241, 0.05);
+        }
+
+        .enhanced-dropzone.dragover {
+            border-color: #4de1d7;
+            background: rgba(102, 252, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        /* Progress Ring */
+        .progress-ring {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+        }
+
+        .progress-ring__circle {
+            stroke: #66fcf1;
+            stroke-dasharray: 251;
+            stroke-dashoffset: 251;
+            transition: stroke-dashoffset 0.3s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* File Card */
+        .file-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(102, 252, 241, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .file-card:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(102, 252, 241, 0.3);
+            transform: translateX(5px);
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #66fcf1, #4de1d7);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .file-size {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        /* Smart Preview */
+        .smart-preview {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(102, 252, 241, 0.1);
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: #64748b;
+        }
+
+        /* Batch Operations */
+        .batch-controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .batch-btn {
+            background: rgba(102, 252, 241, 0.1);
+            border: 1px solid rgba(102, 252, 241, 0.3);
+            color: #66fcf1;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .batch-btn:hover {
+            background: rgba(102, 252, 241, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Upload Queue */
+        .upload-queue {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .queue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(102, 252, 241, 0.1);
+        }
+
+        .queue-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+        }
+
+        .status-indicator.uploading {
+            background: #66fcf1;
+            animation: pulse 1s infinite;
+        }
+
+        .status-indicator.success {
+            background: #10b981;
+        }
+
+        .status-indicator.error {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Real-time Validation */
+        .validation-message {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .validation-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .validation-message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .validation-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        /* Interactive Demo Button */
+        .demo-btn {
+            background: linear-gradient(135deg, #66fcf1 0%, #4de1d7 100%);
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 252, 241, 0.3);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Upload Page Improvements</h1>
+            <p class="subtitle">Enhanced user experience concepts and interactions</p>
+        </div>
+
+        <div class="demo-grid">
+            <!-- Enhanced Drop Zone -->
+            <div class="demo-card">
+                <h3>Enhanced Drop Zone</h3>
+                <p>Interactive drag & drop with visual feedback and hover effects</p>
+                <div class="enhanced-dropzone" id="demo-dropzone">
+                    <div>Drag files here or click to browse</div>
+                    <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 5px;">
+                        Supports multiple file formats
+                    </div>
+                </div>
+                <div class="validation-message" id="validation-msg"></div>
+            </div>
+
+            <!-- Progress Visualization -->
+            <div class="demo-card">
+                <h3>Advanced Progress Ring</h3>
+                <p>Circular progress indicator with real-time percentage and ETA</p>
+                <div style="text-align: center;">
+                    <svg class="progress-ring" width="80" height="80">
+                        <circle class="progress-ring__circle"
+                                stroke-width="4"
+                                fill="transparent"
+                                r="40"
+                                cx="40"
+                                cy="40"/>
+                    </svg>
+                    <div>
+                        <span id="progress-text">0%</span>
+                        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 5px;" id="eta-text">
+                            Click to start demo
+                        </div>
+                    </div>
+                    <button class="demo-btn" onclick="startProgressDemo()">Start Upload Demo</button>
+                </div>
+            </div>
+
+            <!-- Smart File Cards -->
+            <div class="demo-card">
+                <h3>Smart File Cards</h3>
+                <p>File type detection with metadata and interactive previews</p>
+                <div id="file-cards-demo">
+                    <div class="file-card">
+                        <div class="file-icon">PDF</div>
+                        <div class="file-info">
+                            <div class="file-name">document.pdf</div>
+                            <div class="file-size">2.4 MB • 15 pages</div>
+                        </div>
+                        <div class="status-indicator success"></div>
+                    </div>
+                    <div class="file-card">
+                        <div class="file-icon">IMG</div>
+                        <div class="file-info">
+                            <div class="file-name">photo.jpg</div>
+                            <div class="file-size">1.8 MB • 1920x1080</div>
+                        </div>
+                        <div class="status-indicator uploading"></div>
+                    </div>
+                </div>
+                <button class="demo-btn" onclick="addFileCard()">Add Random File</button>
+            </div>
+
+            <!-- Upload Queue Management -->
+            <div class="demo-card">
+                <h3>Upload Queue Management</h3>
+                <p>Batch operations with priority control and status tracking</p>
+                <div class="upload-queue">
+                    <div class="queue-header">
+                        <span>Upload Queue (3 files)</span>
+                        <span style="font-size: 0.8rem; color: #94a3b8;">2 pending</span>
+                    </div>
+                    <div id="queue-demo">
+                        <div class="queue-item">
+                            <div class="status-indicator success"></div>
+                            <span style="flex: 1;">report.docx</span>
+                            <span style="font-size: 0.8rem; color: #10b981;">Completed</span>
+                        </div>
+                        <div class="queue-item">
+                            <div class="status-indicator uploading"></div>
+                            <span style="flex: 1;">presentation.pptx</span>
+                            <span style="font-size: 0.8rem; color: #66fcf1;">Uploading...</span>
+                        </div>
+                        <div class="queue-item">
+                            <div class="status-indicator"></div>
+                            <span style="flex: 1;">data.csv</span>
+                            <span style="font-size: 0.8rem; color: #94a3b8;">Pending</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="batch-controls">
+                    <button class="batch-btn">Pause All</button>
+                    <button class="batch-btn">Resume All</button>
+                    <button class="batch-btn">Clear Completed</button>
+                </div>
+            </div>
+
+            <!-- Real-time Validation -->
+            <div class="demo-card">
+                <h3>Real-time Validation</h3>
+                <p>Instant feedback for file size, format, and upload requirements</p>
+                <input type="file" id="validation-demo" style="margin-bottom: 15px;" multiple>
+                <div class="smart-preview" id="validation-preview">
+                    <div class="preview-placeholder">
+                        Select files to see real-time validation
+                    </div>
+                </div>
+            </div>
+
+            <!-- Smart Preview Panel -->
+            <div class="demo-card">
+                <h3>Smart Preview Panel</h3>
+                <p>Adaptive preview system for different file types</p>
+                <div class="smart-preview" id="smart-preview-demo">
+                    <div class="preview-placeholder">
+                        <div>No file selected</div>
+                        <div style="font-size: 0.8rem; margin-top: 10px;">
+                            Preview supports images, documents, and videos
+                        </div>
+                    </div>
+                </div>
+                <button class="demo-btn" onclick="showPreviewDemo()">Demo Preview</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding: 20px; background: rgba(102, 252, 241, 0.05); border-radius: 12px; border: 1px solid rgba(102, 252, 241, 0.1);">
+            <h3 style="color: #66fcf1; margin-bottom: 10px;">Implementation Ready</h3>
+            <p style="color: #cbd5e1;">All these improvements can be integrated into the main upload page. Each component is modular and performance-optimized.</p>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Drop Zone Demo
+        const dropzone = document.getElementById('demo-dropzone');
+        const validationMsg = document.getElementById('validation-msg');
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            showValidation('Files detected! Validation passed.', 'success');
+        });
+
+        dropzone.addEventListener('click', () => {
+            showValidation('File browser opened', 'success');
+        });
+
+        function showValidation(message, type) {
+            validationMsg.textContent = message;
+            validationMsg.className = `validation-message ${type} show`;
+            setTimeout(() => {
+                validationMsg.classList.remove('show');
+            }, 3000);
+        }
+
+        // Progress Ring Demo
+        function startProgressDemo() {
+            const circle = document.querySelector('.progress-ring__circle');
+            const progressText = document.getElementById('progress-text');
+            const etaText = document.getElementById('eta-text');
+            const circumference = 2 * Math.PI * 40;
+            
+            circle.style.strokeDasharray = circumference;
+            circle.style.strokeDashoffset = circumference;
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                const offset = circumference - (progress / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
+                progressText.textContent = Math.round(progress) + '%';
+                
+                const remainingTime = Math.max(0, Math.round((100 - progress) / 10));
+                etaText.textContent = remainingTime > 0 ? `${remainingTime}s remaining` : 'Complete!';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progress = 0;
+                        circle.style.strokeDashoffset = circumference;
+                        progressText.textContent = '0%';
+                        etaText.textContent = 'Click to start demo';
+                    }, 2000);
+                }
+            }, 200);
+        }
+
+        // File Cards Demo
+        function addFileCard() {
+            const container = document.getElementById('file-cards-demo');
+            const fileTypes = [
+                {ext: 'TXT', name: 'notes.txt', size: '1.2 KB', meta: 'Plain text'},
+                {ext: 'VID', name: 'video.mp4', size: '45.6 MB', meta: '1080p • 5:32'},
+                {ext: 'XLS', name: 'data.xlsx', size: '3.4 MB', meta: '15 sheets'},
+                {ext: 'DOC', name: 'report.docx', size: '892 KB', meta: '24 pages'}
+            ];
+            
+            const randomFile = fileTypes[Math.floor(Math.random() * fileTypes.length)];
+            
+            const fileCard = document.createElement('div');
+            fileCard.className = 'file-card';
+            fileCard.style.opacity = '0';
+            fileCard.style.transform = 'translateY(20px)';
+            
+            fileCard.innerHTML = `
+                <div class="file-icon">${randomFile.ext}</div>
+                <div class="file-info">
+                    <div class="file-name">${randomFile.name}</div>
+                    <div class="file-size">${randomFile.size} • ${randomFile.meta}</div>
+                </div>
+                <div class="status-indicator uploading"></div>
+            `;
+            
+            container.appendChild(fileCard);
+            
+            setTimeout(() => {
+                fileCard.style.transition = 'all 0.3s ease';
+                fileCard.style.opacity = '1';
+                fileCard.style.transform = 'translateY(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                const indicator = fileCard.querySelector('.status-indicator');
+                indicator.classList.remove('uploading');
+                indicator.classList.add('success');
+            }, 2000);
+        }
+
+        // Validation Demo
+        document.getElementById('validation-demo').addEventListener('change', (e) => {
+            const preview = document.getElementById('validation-preview');
+            const files = e.target.files;
+            
+            if (files.length > 0) {
+                let validationResults = [];
+                
+                Array.from(files).forEach(file => {
+                    const sizeOK = file.size < 10 * 1024 * 1024; // 10MB limit
+                    const typeOK = ['image/', 'video/', 'application/pdf', 'text/'].some(type => 
+                        file.type.startsWith(type)
+                    );
+                    
+                    validationResults.push({
+                        name: file.name,
+                        size: (file.size / 1024 / 1024).toFixed(1) + ' MB',
+                        valid: sizeOK && typeOK,
+                        issues: [
+                            !sizeOK ? 'File too large (>10MB)' : null,
+                            !typeOK ? 'Unsupported file type' : null
+                        ].filter(Boolean)
+                    });
+                });
+                
+                preview.innerHTML = validationResults.map(result => `
+                    <div style="margin: 10px 0; padding: 10px; border-radius: 6px; background: ${result.valid ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; border: 1px solid ${result.valid ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'};">
+                        <div style="font-weight: 600; color: ${result.valid ? '#10b981' : '#ef4444'};">${result.name}</div>
+                        <div style="font-size: 0.8rem; color: #94a3b8;">${result.size}</div>
+                        ${result.issues.length > 0 ? `<div style="font-size: 0.8rem; color: #ef4444; margin-top: 5px;">${result.issues.join(', ')}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+        });
+
+        // Preview Demo
+        function showPreviewDemo() {
+            const preview = document.getElementById('smart-preview-demo');
+            const demoContent = [
+                '<div style="text-align: center;"><div style="width: 60px; height: 60px; background: linear-gradient(135deg, #66fcf1, #4de1d7); border-radius: 8px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #0f172a;">IMG</div><div>photo.jpg</div><div style="font-size: 0.8rem; color: #94a3b8;">1920x1080 • 2.4MB</div></div>',
+                '<div style="text-align: center;"><div style="width: 60px; height: 60px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 8px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">PDF</div><div>document.pdf</div><div style="font-size: 0.8rem; color: #94a3b8;">15 pages • 3.2MB</div></div>',
+                '<div style="text-align: center;"><div style="width: 60px; height: 60px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 8px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">VID</div><div>video.mp4</div><div style="font-size: 0.8rem; color: #94a3b8;">1080p • 5:32 • 45MB</div></div>'
+            ];
+            
+            const randomContent = demoContent[Math.floor(Math.random() * demoContent.length)];
+            preview.innerHTML = randomContent;
+        }
+    </script>
+</body>
+</html>

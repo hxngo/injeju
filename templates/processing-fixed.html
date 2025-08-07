@@ -1,0 +1,586 @@
+{% extends "base.html" %}
+{% block title %}Processing - CORSS{% endblock %}
+{% block body %}
+<style>
+  html, body {
+    background: #111f2e;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  body {
+    opacity: 1; 
+    transition: opacity 0.6s cubic-bezier(.5,.04,.27,1);
+  }
+  body.fade-out { 
+    opacity: 0; 
+    pointer-events: none; 
+  }
+  body.fade-in { 
+    opacity: 1; 
+  }
+  
+  .bg-blur-img {
+    position: fixed; 
+    top: 0; 
+    left: 0;
+    width: 100vw; 
+    height: 100vh;
+    object-fit: cover;
+    filter: brightness(0.53) blur(2px) grayscale(8%);
+    z-index: 0;
+  }
+  
+  .bg-overlay {
+    position: fixed; 
+    top: 0; 
+    left: 0;
+    width: 100vw; 
+    height: 100vh;
+    background: linear-gradient(120deg, rgba(20,40,70,0.82), rgba(10,36,70,0.91));
+    z-index: 1;
+  }
+  
+  .navbar {
+    position: fixed; 
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 80px;
+    background: linear-gradient(135deg, rgba(20, 30, 48, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(102, 252, 241, 0.1);
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 0 40px; 
+    z-index: 1002;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  }
+  
+  .navbar img { 
+    height: 65px; 
+    cursor: pointer; 
+    transition: transform 0.3s ease;
+  }
+  
+  .navbar img:hover {
+    transform: scale(1.05);
+  }
+  
+  .navbar-links {
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 12px;
+    border-radius: 50px;
+    border: 1px solid rgba(102, 252, 241, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-links a {
+    font-weight: 600; 
+    font-size: 0.95rem; 
+    color: #c1d9f0;
+    text-decoration: none; 
+    padding: 12px 20px;
+    border-radius: 25px; 
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .navbar-links a:hover {
+    color: #66fcf1;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.15) 0%, rgba(77, 225, 215, 0.1) 100%);
+    border-color: rgba(102, 252, 241, 0.3);
+    text-shadow: 0 0 15px rgba(102, 252, 241, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 25px rgba(102, 252, 241, 0.2),
+      0 0 0 1px rgba(102, 252, 241, 0.1) inset;
+  }
+
+  /* Processing Layout */
+  .process-wrapper {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: calc(100vh - 80px);
+    padding: 120px 40px 60px;
+    color: white;
+  }
+
+  .process-title {
+    font-size: 3rem;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #66fcf1, #4de1d7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(102, 252, 241, 0.5);
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    width: 100%;
+    max-width: 600px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-bottom: 50px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress {
+    height: 100%;
+    background: linear-gradient(90deg, #66fcf1, #4de1d7);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 0 20px rgba(102, 252, 241, 0.6);
+  }
+
+  /* Steps */
+  .steps-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 50px;
+  }
+
+  .step-line {
+    position: absolute;
+    top: 20px;
+    left: 50px;
+    right: 50px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    z-index: 1;
+  }
+
+  .step-line-progress {
+    position: absolute;
+    top: 20px;
+    left: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, #66fcf1, #4de1d7);
+    width: 0%;
+    transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 2;
+    box-shadow: 0 0 10px rgba(102, 252, 241, 0.8);
+  }
+
+  .steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 3;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.5s ease;
+    position: relative;
+  }
+
+  .step::before {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 10px;
+    transition: all 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .step.active {
+    color: #66fcf1;
+  }
+
+  .step.active::before {
+    background: rgba(102, 252, 241, 0.2);
+    border-color: #66fcf1;
+    box-shadow: 0 0 20px rgba(102, 252, 241, 0.5);
+    animation: pulse 2s infinite;
+  }
+
+  .step.completed {
+    color: #10b981;
+  }
+
+  .step.completed::before {
+    background: #10b981;
+    border-color: #10b981;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+  }
+
+  @keyframes pulse {
+    0%, 100% { 
+      transform: scale(1); 
+      opacity: 1; 
+    }
+    50% { 
+      transform: scale(1.1); 
+      opacity: 0.8; 
+    }
+  }
+
+  /* Process Content */
+  .process-content {
+    display: flex;
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+    height: 400px;
+  }
+
+  .process-main {
+    flex: 2;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(102, 252, 241, 0.2);
+    border-radius: 15px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .process-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .process-image img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .process-image img.visible {
+    opacity: 1;
+  }
+
+  .loader {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid #66fcf1;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .process-log {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(102, 252, 241, 0.2);
+    border-radius: 15px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .log-content {
+    flex: 1;
+    color: #d5e4f8;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    overflow-y: auto;
+    margin-bottom: 15px;
+  }
+
+  .keywords-box {
+    background: rgba(102, 252, 241, 0.1);
+    border: 1px solid rgba(102, 252, 241, 0.3);
+    border-radius: 8px;
+    padding: 10px;
+    color: #66fcf1;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  /* Next Button */
+  .next-button {
+    width: 200px;
+    margin-top: 40px;
+    background: linear-gradient(135deg, #66fcf1, #4de1d7);
+    color: #111;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 10px 30px rgba(102, 252, 241, 0.3);
+  }
+
+  .next-button.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .next-button:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(102, 252, 241, 0.5);
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .process-wrapper {
+      padding: 100px 20px 40px;
+    }
+    
+    .process-title {
+      font-size: 2rem;
+    }
+    
+    .process-content {
+      flex-direction: column;
+      height: auto;
+    }
+    
+    .steps {
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .step {
+      flex: 1;
+      min-width: 120px;
+    }
+  }
+</style>
+
+<!-- Background -->
+<img class="bg-blur-img" src="{{ url_for('static', filename='images/back3.jpg') }}">
+<div class="bg-overlay"></div>
+
+<!-- Navbar -->
+<div class="navbar">
+  <div class="navbar-brand">
+    <img src="{{ url_for('static', filename='images/CORSS_logo_checked.png') }}"
+         alt="CORSS Logo"
+         data-metallic-logo>
+  </div>
+  <div class="navbar-links">
+    <a href="/">Home</a>
+    <a href="/upload">Upload</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </div>
+</div>
+
+<!-- Main Processing Content -->
+<div class="process-wrapper">
+  <div class="process-title">
+    <i data-lucide="rocket" style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;"></i>
+    PROCESSING...
+  </div>
+  
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps-wrapper">
+    <div class="step-line"></div>
+    <div class="step-line-progress" id="step-line-progress"></div>
+    <div class="steps">
+      <div class="step active" id="step1">1. Loading Image</div>
+      <div class="step" id="step2">2. Detecting Objects</div>
+      <div class="step" id="step3">3. Segmenting Image</div>
+      <div class="step" id="step4">4. Refining with SAM</div>
+    </div>
+  </div>
+
+  <!-- Processing Content -->
+  <div class="process-content">
+    <div class="process-main">
+      <div class="process-image">
+        <div class="loader" id="loader-main"></div>
+        <img id="main-image" src="">
+      </div>
+    </div>
+    
+    <div class="process-log">
+      <div class="log-content" id="log-content"></div>
+      <div class="keywords-box" id="keywords">[ 분석 중... ]</div>
+    </div>
+  </div>
+  
+  <!-- Next Button -->
+  <a href="/detail" class="next-button page-link" id="next-button">View Results →</a>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Elements
+  const steps = document.querySelectorAll('.step');
+  const progress = document.getElementById('progress');
+  const stepLineProgress = document.getElementById('step-line-progress');
+  const nextButton = document.getElementById('next-button');
+  const logContent = document.getElementById('log-content');
+  const keywordsBox = document.getElementById('keywords');
+  const mainImage = document.getElementById('main-image');
+  const loaderMain = document.getElementById('loader-main');
+  
+  // Data
+  const images = [
+    "",
+    "{{ url_for('static', filename='images/arm.png') }}",
+    "{{ url_for('static', filename='images/arm1.png') }}",
+    "{{ url_for('static', filename='images/processing_seg.png') }}"
+  ];
+  
+  const logs = [
+    '<i data-lucide="upload" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></i>Initializing image upload...',
+    '<i data-lucide="search" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></i>Object detection started using YOLO model...',
+    '<i data-lucide="scissors" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></i>Image segmentation in progress...',
+    '<i data-lucide="target" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></i>SAM model refinement applied...',
+    '<i data-lucide="check-circle" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"></i>Processing completed successfully!'
+  ];
+  
+  const keywords = [
+    "[ 분석 중... ]",
+    "[ 로봇팔, 객체 ]",
+    "[ 로봇팔, 상자, 테이블 ]",
+    "[ 팔, 박스, 테이블, 그리퍼 ]"
+  ];
+  
+  // Show image function
+  function showImage(src) {
+    if (!src) return;
+    
+    loaderMain.style.display = "block";
+    mainImage.classList.remove("visible");
+    
+    const tempImg = new Image();
+    tempImg.onload = () => {
+      loaderMain.style.display = "none";
+      mainImage.src = src;
+      setTimeout(() => {
+        mainImage.classList.add("visible");
+      }, 100);
+    };
+    tempImg.src = src;
+  }
+  
+  // Processing sequence
+  let step = 0;
+  function nextStep() {
+    if (step > 0) {
+      steps[step-1].classList.remove('active');
+      steps[step-1].classList.add('completed');
+    }
+    
+    if (step < steps.length) {
+      steps[step].classList.add('active');
+      
+      // Update log
+      if (logContent) {
+        logContent.innerHTML += logs[step] + "<br>";
+        logContent.scrollTop = logContent.scrollHeight;
+        
+        // Reinitialize Lucide icons for new content
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+      
+      // Update keywords
+      if (keywordsBox && keywords[step]) {
+        keywordsBox.textContent = keywords[step];
+      }
+      
+      // Show image
+      if (images[step]) {
+        showImage(images[step]);
+      }
+      
+      // Update progress
+      const percent = ((step + 1) / steps.length * 100);
+      progress.style.width = percent + "%";
+      stepLineProgress.style.width = percent + "%";
+      
+      step++;
+      setTimeout(nextStep, 2500);
+    } else {
+      // Complete all steps
+      steps[steps.length - 1].classList.remove('active');
+      steps[steps.length - 1].classList.add('completed');
+      
+      // Show next button
+      if (nextButton) {
+        nextButton.classList.add('visible');
+      }
+    }
+  }
+  
+  // Page transitions
+  document.querySelectorAll('.page-link').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const href = btn.getAttribute('href');
+      
+      document.body.classList.remove('fade-in');
+      document.body.classList.add('fade-out');
+      
+      setTimeout(function() {
+        window.location.href = href;
+      }, 600);
+    });
+  });
+  
+  // Initialize
+  document.body.classList.add("fade-in");
+  
+  // Initialize Lucide Icons
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+  
+  // Start processing
+  setTimeout(nextStep, 1000);
+});
+</script>
+{% endblock %}

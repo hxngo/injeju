@@ -1,0 +1,356 @@
+/* 🎯 React Bits Style Target Cursor - Simplified Version */
+
+.target-cursor-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 999999;  /* 더 높은 z-index */
+  /* mix-blend-mode 제거하여 더 잘 보이게 */
+  transform: translate(-50%, -50%);
+  transition: none;
+  will-change: transform;
+  opacity: 1;
+}
+
+.target-cursor-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;  /* 더 크게 */
+  height: 10px;
+  background: #66fcf1;  /* 밝은 청록색 */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  transition: none;
+  box-shadow: 0 0 15px rgba(102, 252, 241, 1);  /* 강한 글로우 */
+  border: 1px solid #ffffff;  /* 흰색 테두리로 더 명확하게 */
+}
+
+.target-cursor-corner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;  /* 더 크게 */
+  height: 20px;
+  border: 2px solid #66fcf1;  /* 두껍고 밝은 색상 */
+  will-change: transform;
+  transition: none;
+  opacity: 1;  /* 완전히 불투명 */
+  box-shadow: 0 0 10px rgba(102, 252, 241, 0.5);  /* 글로우 추가 */
+}
+
+/* React Bits Style Corner Positioning - Simplified */
+.corner-tl {
+  transform: translate(-150%, -150%);
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-tr {
+  transform: translate(50%, -150%);
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-br {
+  transform: translate(50%, 50%);
+  border-left: none;
+  border-top: none;
+}
+
+.corner-bl {
+  transform: translate(-150%, 50%);
+  border-right: none;
+  border-top: none;
+}
+
+/* 색상 변화 효과 제거 - 모든 상태에서 동일한 색상 유지 */
+.target-cursor-wrapper.magnetic .target-cursor-dot {
+  background: #ffffff;  /* 색상 변화 없음 */
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%) scale(1.0);  /* 크기 변화도 최소화 */
+}
+
+.target-cursor-wrapper.magnetic .target-cursor-corner {
+  border-color: #ffffff;  /* 색상 변화 없음 */
+  opacity: 0.6;
+}
+
+.target-cursor-wrapper.expanded .target-cursor-dot {
+  background: #ffffff;  /* 색상 변화 없음 */
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%) scale(1.0);  /* 크기 변화도 최소화 */
+}
+
+.target-cursor-wrapper.expanded .target-cursor-corner {
+  border-color: #ffffff;  /* 색상 변화 없음 */
+  opacity: 0.6;
+  border-width: 1px;  /* 두께 변화도 제거 */
+}
+
+/* 기본 커서 숨기기 */
+* {
+  cursor: none !important;
+}
+
+/* 중요한 요소들 호버 효과 */
+button, .btn, .btn-enhanced, .nav-link, a, .cursor-target {
+  position: relative;
+}
+
+button:hover, .btn:hover, .nav-link:hover, a:hover {
+  transform: translateY(-1px) scale(1.01);
+}
+
+/* 텍스트 입력 영역에서는 텍스트 커서 표시 */
+input, textarea, [contenteditable] {
+  cursor: text !important;
+}
+
+/* 모바일에서는 커서 비활성화 */
+@media (max-width: 768px) {
+  .target-cursor-wrapper {
+    display: none !important;
+  }
+  
+  * {
+    cursor: auto !important;
+  }
+  
+  button, .btn, a {
+    cursor: pointer !important;
+  }
+}
+
+/* 고성능을 위한 GPU 가속 */
+.target-cursor-wrapper,
+.target-cursor-dot,
+.target-cursor-corner {
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+/* 기본 커서 숨기기 - 하지만 백업 보장 */
+* {
+  cursor: none !important;
+}
+
+/* 중요한 요소들에는 백업 커서 제공 */
+button, .btn, .btn-enhanced, .nav-link, a, .cursor-target {
+  position: relative;
+}
+
+button:hover, .btn:hover, .nav-link:hover, a:hover {
+  transform: translateY(-1px) scale(1.01);
+}
+
+/* 텍스트 입력 영역에서는 텍스트 커서 표시 */
+input, textarea, [contenteditable] {
+  cursor: text !important;
+}
+
+/* 모바일에서는 커서 비활성화 */
+@media (max-width: 768px) {
+  .target-cursor-wrapper {
+    display: none !important;
+  }
+  
+  * {
+    cursor: auto !important;
+  }
+  
+  button, .btn, a {
+    cursor: pointer !important;
+  }
+}
+
+/* 고성능을 위한 GPU 가속 */
+.target-cursor-wrapper,
+.target-cursor-dot,
+.target-cursor-corner {
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.target-cursor-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.target-cursor-corner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  will-change: transform;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.8;
+}
+
+/* React Bits Style Corner Positioning */
+.corner-tl {
+  transform: translate(-200%, -200%);
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0 0 0 2px;
+}
+
+.corner-tr {
+  transform: translate(100%, -200%);
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0 0 0 2px;
+}
+
+.corner-br {
+  transform: translate(100%, 100%);
+  border-left: none;
+  border-top: none;
+  border-radius: 2px 0 0 0;
+}
+
+.corner-bl {
+  transform: translate(-200%, 100%);
+  border-right: none;
+  border-top: none;
+  border-radius: 0 2px 0 0;
+}
+
+/* React Bits Style Magnetic Effect */
+.target-cursor-wrapper.magnetic {
+  filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.4));
+}
+
+.target-cursor-wrapper.magnetic .target-cursor-dot {
+  background: #3b82f6;
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.6);
+  transform: translate(-50%, -50%) scale(1.3);
+}
+
+.target-cursor-wrapper.magnetic .target-cursor-corner {
+  border-color: #3b82f6;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+}
+
+/* React Bits Style Expanded State */
+.target-cursor-wrapper.expanded {
+  filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.5));
+}
+
+.target-cursor-wrapper.expanded .target-cursor-dot {
+  background: #10b981;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.7);
+  transform: translate(-50%, -50%) scale(1.5);
+}
+
+.target-cursor-wrapper.expanded .target-cursor-corner {
+  border-color: #10b981;
+  opacity: 1;
+  filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.4));
+  border-width: 3px;
+}
+
+/* Dynamic corner positioning for expanded state */
+.target-cursor-wrapper.expanded .corner-tl {
+  transform: translate(-50%, -50%);
+}
+
+.target-cursor-wrapper.expanded .corner-tr {
+  transform: translate(-50%, -50%);
+}
+
+.target-cursor-wrapper.expanded .corner-br {
+  transform: translate(-50%, -50%);
+}
+
+.target-cursor-wrapper.expanded .corner-bl {
+  transform: translate(-50%, -50%);
+}
+
+/* 🧲 자석 효과를 받는 요소들 스타일 */
+button, .btn, .btn-enhanced, .nav-link, a, 
+input, textarea, .file-drop, .cursor-target,
+.test-button, .test-card {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 자석 효과 호버 시 요소 반응 */
+button:hover, .btn:hover, .btn-enhanced:hover, 
+.nav-link:hover, a:hover, .cursor-target:hover,
+.test-button:hover, .test-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  filter: drop-shadow(0 8px 25px rgba(102, 252, 241, 0.2));
+}
+
+/* 🎯 고성능 자석 효과를 위한 GPU 가속 */
+.target-cursor-wrapper,
+.target-cursor-dot,
+.target-cursor-corner {
+  backface-visibility: hidden;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* 기본 커서 숨김 */
+* {
+  cursor: none !important;
+}
+
+/* 텍스트 입력 영역에서는 텍스트 커서 표시 */
+input, textarea, [contenteditable] {
+  cursor: text !important;
+}
+
+/* 모바일에서는 커서 비활성화 */
+@media (max-width: 768px) {
+  .target-cursor-wrapper {
+    display: none !important;
+  }
+  
+  * {
+    cursor: auto !important;
+  }
+}
+
+/* 성능 최적화를 위한 reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .target-cursor-wrapper,
+  .target-cursor-dot,
+  .target-cursor-corner {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .target-cursor-dot {
+    background: #ffffff;
+  }
+  
+  .target-cursor-corner {
+    border-color: #ffffff;
+  }
+  
+  .target-cursor-wrapper.expanded .target-cursor-dot,
+  .target-cursor-wrapper.expanded .target-cursor-corner {
+    filter: none;
+    box-shadow: none;
+  }
+}

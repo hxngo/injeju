@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload with React Bits ScrollStack</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f0f6ff;
+            min-height: 100vh;
+        }
+
+        #root {
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #66fcf1 0%, #4de1d7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .upload-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed rgba(102, 252, 241, 0.3);
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(15, 23, 42, 0.3);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .drop-zone:hover {
+            border-color: #66fcf1;
+            background: rgba(102, 252, 241, 0.05);
+        }
+
+        .drop-zone.dragover {
+            border-color: #4de1d7;
+            background: rgba(102, 252, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        .drop-text {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #e2e8f0;
+        }
+
+        .drop-hint {
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+
+        .browse-btn {
+            background: linear-gradient(135deg, #66fcf1 0%, #4de1d7 100%);
+            color: #0f172a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .browse-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 252, 241, 0.3);
+        }
+
+        /* ScrollStack Container */
+        .scroll-stack-wrapper {
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 16px;
+            border: 1px solid rgba(102, 252, 241, 0.1);
+            overflow: hidden;
+            height: 500px;
+        }
+
+        /* ScrollStack Styles */
+        .scroll-stack {
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .scroll-stack::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-stack::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+        }
+
+        .scroll-stack::-webkit-scrollbar-thumb {
+            background: rgba(102, 252, 241, 0.3);
+            border-radius: 3px;
+        }
+
+        /* ScrollStackItem Styles */
+        .scroll-stack-item {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(102, 252, 241, 0.1);
+            border-radius: 12px;
+            margin: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .scroll-stack-item:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(102, 252, 241, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Stacking effect */
+        .scroll-stack-item.is-stacked {
+            position: sticky;
+            top: 10px;
+            z-index: 10;
+            transform: scale(0.98);
+            opacity: 0.95;
+        }
+
+        .scroll-stack-item.is-stacked:nth-child(2) {
+            top: 15px;
+            z-index: 9;
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+
+        .scroll-stack-item.is-stacked:nth-child(3) {
+            top: 20px;
+            z-index: 8;
+            transform: scale(0.94);
+            opacity: 0.85;
+        }
+
+        /* File Card Content */
+        .file-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .file-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: #0f172a;
+        }
+
+        .file-icon.pdf { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .file-icon.img { background: linear-gradient(135deg, #10b981, #059669); }
+        .file-icon.doc { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .file-icon.txt { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+            font-size: 1rem;
+        }
+
+        .file-meta {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .file-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.uploading {
+            background: #66fcf1;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-dot.complete {
+            background: #10b981;
+        }
+
+        .status-dot.error {
+            background: #ef4444;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(102, 252, 241, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #66fcf1, #4de1d7);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Header */
+        .stack-header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-bottom: 1px solid rgba(102, 252, 241, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .stack-title {
+            color: #66fcf1;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .stack-count {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Actions */
+        .upload-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #66fcf1 0%, #4de1d7 100%);
+            color: #0f172a;
+        }
+
+        .action-btn.secondary {
+            background: rgba(102, 252, 241, 0.1);
+            color: #66fcf1;
+            border: 1px solid rgba(102, 252, 241, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .upload-layout {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .scroll-stack-wrapper {
+                height: 400px;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // ScrollStack Component (React Bits inspired)
+        const ScrollStack = ({ children }) => {
+            const containerRef = useRef(null);
+            const [stackedIndices, setStackedIndices] = useState(new Set());
+
+            useEffect(() => {
+                const container = containerRef.current;
+                if (!container) return;
+
+                const handleScroll = () => {
+                    const items = container.querySelectorAll('.scroll-stack-item');
+                    const newStackedIndices = new Set();
+
+                    items.forEach((item, index) => {
+                        const rect = item.getBoundingClientRect();
+                        const containerRect = container.getBoundingClientRect();
+                        
+                        // Check if item is near the top and should be stacked
+                        if (rect.top <= containerRect.top + 100 && index < 3) {
+                            newStackedIndices.add(index);
+                        }
+                    });
+
+                    setStackedIndices(newStackedIndices);
+                };
+
+                container.addEventListener('scroll', handleScroll);
+                handleScroll(); // Initial check
+
+                return () => container.removeEventListener('scroll', handleScroll);
+            }, [children]);
+
+            return (
+                <div className="scroll-stack" ref={containerRef}>
+                    {React.Children.map(children, (child, index) => {
+                        const isStacked = stackedIndices.has(index);
+                        return React.cloneElement(child, { 
+                            isStacked,
+                            stackIndex: isStacked ? Array.from(stackedIndices).indexOf(index) : -1
+                        });
+                    })}
+                </div>
+            );
+        };
+
+        // ScrollStackItem Component
+        const ScrollStackItem = ({ children, isStacked, stackIndex }) => {
+            const className = `scroll-stack-item ${isStacked ? 'is-stacked' : ''}`;
+            
+            return (
+                <div className={className}>
+                    {children}
+                </div>
+            );
+        };
+
+        // File Card Component
+        const FileCard = ({ file, onProgressUpdate }) => {
+            const [progress, setProgress] = useState(0);
+            const [status, setStatus] = useState('uploading');
+
+            useEffect(() => {
+                if (status === 'uploading') {
+                    const interval = setInterval(() => {
+                        setProgress(prev => {
+                            const newProgress = prev + Math.random() * 15;
+                            if (newProgress >= 100) {
+                                setStatus('complete');
+                                clearInterval(interval);
+                                return 100;
+                            }
+                            return newProgress;
+                        });
+                    }, 200 + Math.random() * 300);
+
+                    return () => clearInterval(interval);
+                }
+            }, [status]);
+
+            const getFileType = (filename) => {
+                const ext = filename.split('.').pop().toLowerCase();
+                if (['pdf'].includes(ext)) return 'pdf';
+                if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'img';
+                if (['doc', 'docx'].includes(ext)) return 'doc';
+                return 'txt';
+            };
+
+            const formatFileSize = (bytes) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            };
+
+            const fileType = getFileType(file.name);
+
+            return (
+                <div className="file-card">
+                    <div className={`file-icon ${fileType}`}>
+                        {fileType.toUpperCase()}
+                    </div>
+                    <div className="file-info">
+                        <div className="file-name">{file.name}</div>
+                        <div className="file-meta">{formatFileSize(file.size)}</div>
+                        {status === 'uploading' && (
+                            <div className="progress-bar">
+                                <div 
+                                    className="progress-fill" 
+                                    style={ { width: progress + '%' } }
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <div className="file-status">
+                        <div className={`status-dot ${status}`} />
+                    </div>
+                </div>
+            );
+        };
+
+        // Main Upload Component
+        const UploadApp = () => {
+            const [files, setFiles] = useState([]);
+            const [isDragOver, setIsDragOver] = useState(false);
+            const fileInputRef = useRef(null);
+
+            // Demo files for testing
+            const demoFiles = [
+                { name: 'project-report.pdf', size: 2400000, id: 1 },
+                { name: 'hero-image.jpg', size: 1800000, id: 2 },
+                { name: 'requirements.docx', size: 890000, id: 3 },
+                { name: 'data-export.csv', size: 1200000, id: 4 },
+                { name: 'presentation.pdf', size: 5600000, id: 5 },
+                { name: 'wireframes.sketch', size: 3200000, id: 6 },
+                { name: 'user-research.pdf', size: 1900000, id: 7 },
+            ];
+
+            const addFile = (file) => {
+                const newFile = {
+                    ...file,
+                    id: Date.now() + Math.random(),
+                };
+                setFiles(prev => [...prev, newFile]);
+            };
+
+            const handleDrop = (e) => {
+                e.preventDefault();
+                setIsDragOver(false);
+                
+                const droppedFiles = Array.from(e.dataTransfer.files);
+                droppedFiles.forEach(addFile);
+            };
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                setIsDragOver(true);
+            };
+
+            const handleDragLeave = () => {
+                setIsDragOver(false);
+            };
+
+            const handleFileInput = (e) => {
+                const selectedFiles = Array.from(e.target.files);
+                selectedFiles.forEach(addFile);
+            };
+
+            const addDemoFiles = () => {
+                demoFiles.forEach((file, index) => {
+                    setTimeout(() => addFile(file), index * 300);
+                });
+            };
+
+            const clearFiles = () => {
+                setFiles([]);
+            };
+
+            return (
+                <div className="container">
+                    <div className="header">
+                        <h1 className="title">React Bits ScrollStack Upload</h1>
+                        <p className="subtitle">Real ScrollStack component implementation</p>
+                    </div>
+
+                    <div className="upload-layout">
+                        {/* Drop Zone */}
+                        <div 
+                            className={`drop-zone ${isDragOver ? 'dragover' : ''}`}
+                            onDrop={handleDrop}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <div className="drop-text">Drop files here</div>
+                            <div className="drop-hint">or click to browse</div>
+                            <button className="browse-btn">Choose Files</button>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                multiple
+                                style={ { display: 'none' } }
+                                onChange={handleFileInput}
+                            />
+                        </div>
+
+                        {/* ScrollStack */}
+                        <div className="scroll-stack-wrapper">
+                            <div className="stack-header">
+                                <div className="stack-title">Uploaded Files</div>
+                                <div className="stack-count">{files.length} files</div>
+                            </div>
+                            
+                            <ScrollStack>
+                                {files.map((file) => (
+                                    <ScrollStackItem key={file.id}>
+                                        <FileCard file={file} />
+                                    </ScrollStackItem>
+                                ))}
+                                {files.length === 0 && (
+                                    <ScrollStackItem>
+                                        <div style={ { 
+                                            textAlign: 'center', 
+                                            color: '#94a3b8', 
+                                            padding: '40px 20px' 
+                                        } }>
+                                            No files uploaded yet
+                                        </div>
+                                    </ScrollStackItem>
+                                )}
+                            </ScrollStack>
+                        </div>
+                    </div>
+
+                    <div className="upload-actions">
+                        <button className="action-btn secondary" onClick={clearFiles}>
+                            Clear All
+                        </button>
+                        <button className="action-btn secondary" onClick={addDemoFiles}>
+                            Add Demo Files
+                        </button>
+                        <button className="action-btn primary">
+                            Start Upload
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<UploadApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

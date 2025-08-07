@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Target Cursor Demo - injeju</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .demo-section {
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .demo-button {
+            padding: 1.5rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .demo-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .demo-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #4ecdc4;
+        }
+
+        .card-text {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .card-link {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .card-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .large-interactive-area {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 4rem;
+            text-align: center;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            margin: 3rem 0;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .area-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .area-text {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .special-target {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 50px;
+            font-weight: bold;
+            margin: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .footer a {
+            color: #4ecdc4;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .instructions h3 {
+            color: #4ecdc4;
+            margin-bottom: 1rem;
+        }
+
+        .instructions ul {
+            list-style-position: inside;
+            line-height: 1.8;
+        }
+
+        /* Ensure cursor-target elements are visible */
+        .cursor-target {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title cursor-target">🎯 Target Cursor Demo</h1>
+            <p class="subtitle">Experience the React Bits Target Cursor effect in action!</p>
+        </header>
+
+        <div class="instructions">
+            <h3>🔍 How to Use:</h3>
+            <ul>
+                <li>Move your mouse around to see the spinning target cursor</li>
+                <li>Hover over elements marked with 🎯 to see the targeting effect</li>
+                <li>Watch as the cursor corners snap to target elements</li>
+                <li>Experience smooth animations powered by GSAP</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="section-title">Interactive Buttons</h2>
+            <div class="button-grid">
+                <button class="demo-button cursor-target">🎯 Target Me!</button>
+                <button class="demo-button cursor-target">🚀 Hover Effect</button>
+                <button class="demo-button cursor-target">✨ Magic Button</button>
+                <button class="demo-button cursor-target">🎨 Creative Zone</button>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="section-title">Interactive Cards</h2>
+            <div class="card-grid">
+                <div class="demo-card cursor-target">
+                    <h3 class="card-title">🎯 Precision Targeting</h3>
+                    <p class="card-text">Watch how the target cursor precisely locks onto this card when you hover over it.</p>
+                    <a href="#" class="card-link cursor-target">Learn More</a>
+                </div>
+                
+                <div class="demo-card cursor-target">
+                    <h3 class="card-title">⚡ Smooth Animations</h3>
+                    <p class="card-text">Experience buttery smooth animations powered by GSAP and React Bits.</p>
+                    <a href="#" class="card-link cursor-target">Explore</a>
+                </div>
+                
+                <div class="demo-card cursor-target">
+                    <h3 class="card-title">🎨 Beautiful Effects</h3>
+                    <p class="card-text">The target cursor adds a professional touch to any interactive element.</p>
+                    <a href="#" class="card-link cursor-target">Try It</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="section-title">Large Interactive Area</h2>
+            <div class="large-interactive-area cursor-target">
+                <h3 class="area-title">🎯 Massive Target Zone</h3>
+                <p class="area-text">This entire area is a target! Move your mouse over it.</p>
+                <p class="area-text">Notice how the target cursor adapts to the size of the element.</p>
+                <div class="special-target cursor-target">🎯 Special Target Inside</div>
+                <div class="special-target cursor-target">✨ Another Target</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 class="section-title">Mixed Content</h2>
+            <p>Some elements are targets <span class="cursor-target special-target">🎯 like this one</span> while others are not. 
+            The cursor will only activate on designated target elements, creating a <span class="cursor-target special-target">🎯 selective interaction</span> experience.</p>
+        </div>
+
+        <footer class="footer">
+            <p>
+                🚀 Powered by <strong>React Bits Target Cursor</strong> - 
+                <a href="https://reactbits.dev/animations/target-cursor" target="_blank" rel="noopener noreferrer">
+                    Visit React Bits Documentation
+                </a>
+            </p>
+            <p style="margin-top: 1rem;">
+                <a href="/">← Back to Home</a> | 
+                <a href="/cursor-demo">Other Cursor Effects</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- React App will be mounted here if using React version -->
+    <div id="react-root"></div>
+</body>
+</html>

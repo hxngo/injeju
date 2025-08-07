@@ -1,0 +1,237 @@
+.App {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.content {
+  position: relative;
+  z-index: 10;
+  padding: 40px;
+  height: 100vh;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.title {
+  font-size: 4rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #66fcf1, #4de1d7, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+  text-shadow: 0 0 50px rgba(102, 252, 241, 0.3);
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 300;
+  margin: 0;
+}
+
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.demo-section {
+  margin-bottom: 80px;
+}
+
+.demo-section h2 {
+  font-size: 2rem;
+  color: #66fcf1;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.button-group {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.demo-button {
+  padding: 16px 32px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-button.primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
+
+.demo-button.secondary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.demo-button.accent {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.demo-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+  margin-top: 32px;
+}
+
+.demo-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(102, 252, 241, 0.2);
+  border-radius: 20px;
+  padding: 32px;
+  backdrop-filter: blur(15px);
+  transition: all 0.3s ease;
+}
+
+.demo-card:hover {
+  background: rgba(102, 252, 241, 0.08);
+  border-color: rgba(102, 252, 241, 0.4);
+  transform: translateY(-4px);
+}
+
+.demo-card h3 {
+  color: #66fcf1;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.demo-card p {
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.card-link {
+  color: #66fcf1;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: 1px solid rgba(102, 252, 241, 0.3);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.card-link:hover {
+  background: rgba(102, 252, 241, 0.1);
+  border-color: rgba(102, 252, 241, 0.6);
+}
+
+.large-area {
+  width: 100%;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(102, 252, 241, 0.1), rgba(77, 225, 215, 0.05));
+  border: 2px dashed rgba(102, 252, 241, 0.3);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.large-area:hover {
+  background: linear-gradient(135deg, rgba(102, 252, 241, 0.15), rgba(77, 225, 215, 0.1));
+  border-color: rgba(102, 252, 241, 0.5);
+}
+
+.area-content {
+  text-align: center;
+}
+
+.area-content h3 {
+  font-size: 2rem;
+  color: #66fcf1;
+  margin-bottom: 16px;
+}
+
+.area-content p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  margin: 8px 0;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 80px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(102, 252, 241, 0.2);
+}
+
+.footer p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
+
+.footer a {
+  color: #66fcf1;
+  text-decoration: none;
+  margin-left: 8px;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .content {
+    padding: 20px;
+  }
+  
+  .title {
+    font-size: 2.5rem;
+  }
+  
+  .subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .button-group {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .demo-button {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .large-area {
+    height: 200px;
+  }
+  
+  .area-content h3 {
+    font-size: 1.5rem;
+  }
+}

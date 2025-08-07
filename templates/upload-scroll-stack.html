@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload with Scroll Stack</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f0f6ff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #66fcf1 0%, #4de1d7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .upload-area {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed rgba(102, 252, 241, 0.3);
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(15, 23, 42, 0.3);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .drop-zone:hover {
+            border-color: #66fcf1;
+            background: rgba(102, 252, 241, 0.05);
+        }
+
+        .drop-zone.dragover {
+            border-color: #4de1d7;
+            background: rgba(102, 252, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        .drop-text {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #e2e8f0;
+        }
+
+        .drop-hint {
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+
+        .browse-btn {
+            background: linear-gradient(135deg, #66fcf1 0%, #4de1d7 100%);
+            color: #0f172a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .browse-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 252, 241, 0.3);
+        }
+
+        /* Scroll Stack Container */
+        .scroll-stack-container {
+            position: relative;
+            height: 500px;
+            overflow: hidden;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 16px;
+            border: 1px solid rgba(102, 252, 241, 0.1);
+        }
+
+        .scroll-stack {
+            position: relative;
+            height: 100%;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .scroll-stack::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-stack::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 3px;
+        }
+
+        .scroll-stack::-webkit-scrollbar-thumb {
+            background: rgba(102, 252, 241, 0.3);
+            border-radius: 3px;
+        }
+
+        .scroll-stack::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 252, 241, 0.5);
+        }
+
+        /* File Stack Items */
+        .file-stack-item {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(102, 252, 241, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .file-stack-item:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(102, 252, 241, 0.3);
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .file-stack-item.stacked {
+            position: sticky;
+            top: 10px;
+            z-index: 10;
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .file-stack-item.stacked:nth-child(2) {
+            top: 15px;
+            z-index: 9;
+            transform: scale(0.96);
+            opacity: 0.8;
+        }
+
+        .file-stack-item.stacked:nth-child(3) {
+            top: 20px;
+            z-index: 8;
+            transform: scale(0.94);
+            opacity: 0.7;
+        }
+
+        .file-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.75rem;
+            color: #0f172a;
+        }
+
+        .file-icon.pdf { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .file-icon.img { background: linear-gradient(135deg, #10b981, #059669); }
+        .file-icon.doc { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .file-icon.txt { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 2px;
+        }
+
+        .file-meta {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .file-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.uploading {
+            background: #66fcf1;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-dot.complete {
+            background: #10b981;
+        }
+
+        .status-dot.error {
+            background: #ef4444;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(102, 252, 241, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #66fcf1, #4de1d7);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Stack Header */
+        .stack-header {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(102, 252, 241, 0.1);
+            margin: -20px -20px 20px -20px;
+            z-index: 20;
+        }
+
+        .stack-title {
+            color: #66fcf1;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .stack-count {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Actions */
+        .upload-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #66fcf1 0%, #4de1d7 100%);
+            color: #0f172a;
+        }
+
+        .action-btn.secondary {
+            background: rgba(102, 252, 241, 0.1);
+            color: #66fcf1;
+            border: 1px solid rgba(102, 252, 241, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .upload-area {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .scroll-stack-container {
+                height: 400px;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Upload with Scroll Stack</h1>
+            <p class="subtitle">React Bits inspired file stacking visualization</p>
+        </div>
+
+        <div class="upload-area">
+            <!-- Drop Zone -->
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-text">Drop files here</div>
+                <div class="drop-hint">or click to browse</div>
+                <button class="browse-btn">Choose Files</button>
+                <input type="file" id="fileInput" multiple style="display: none;">
+            </div>
+
+            <!-- Scroll Stack -->
+            <div class="scroll-stack-container">
+                <div class="scroll-stack" id="scrollStack">
+                    <div class="stack-header">
+                        <div class="stack-title">Uploaded Files</div>
+                        <div class="stack-count" id="fileCount">0 files</div>
+                    </div>
+                    
+                    <div id="fileList">
+                        <!-- Files will be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-actions">
+            <button class="action-btn secondary" onclick="clearAll()">Clear All</button>
+            <button class="action-btn primary" onclick="startUpload()">Start Upload</button>
+        </div>
+
+        <!-- Demo button -->
+        <div style="text-align: center; margin-top: 40px;">
+            <button class="action-btn secondary" onclick="addDemoFiles()">Add Demo Files</button>
+        </div>
+    </div>
+
+    <script>
+        let fileCounter = 0;
+        const files = [];
+
+        // File type detection
+        function getFileType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            if (['pdf'].includes(ext)) return 'pdf';
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'img';
+            if (['doc', 'docx'].includes(ext)) return 'doc';
+            return 'txt';
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        // Add file to stack
+        function addFileToStack(file, isDemo = false) {
+            const fileId = `file-${++fileCounter}`;
+            const fileType = isDemo ? file.type : getFileType(file.name);
+            const fileSize = isDemo ? file.size : file.size;
+            
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-stack-item';
+            fileItem.id = fileId;
+            
+            fileItem.innerHTML = `
+                <div class="file-header">
+                    <div class="file-icon ${fileType}">${fileType.toUpperCase()}</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-meta">${formatFileSize(fileSize)}</div>
+                    </div>
+                    <div class="file-status">
+                        <div class="status-dot uploading"></div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+            `;
+
+            // Add with animation
+            fileItem.style.transform = 'translateY(20px)';
+            fileItem.style.opacity = '0';
+            
+            document.getElementById('fileList').appendChild(fileItem);
+            
+            // Trigger animation
+            setTimeout(() => {
+                fileItem.style.transform = 'translateY(0)';
+                fileItem.style.opacity = '1';
+            }, 100);
+
+            files.push({ id: fileId, file, element: fileItem });
+            updateFileCount();
+            
+            // Apply stacking effect
+            applyStackingEffect();
+            
+            return fileId;
+        }
+
+        // Apply stacking effect to top items
+        function applyStackingEffect() {
+            const items = document.querySelectorAll('.file-stack-item');
+            items.forEach((item, index) => {
+                item.classList.remove('stacked');
+                if (index < 3) {
+                    item.classList.add('stacked');
+                }
+            });
+        }
+
+        // Simulate upload progress
+        function simulateUpload(fileId) {
+            const fileItem = document.getElementById(fileId);
+            const progressFill = fileItem.querySelector('.progress-fill');
+            const statusDot = fileItem.querySelector('.status-dot');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                progressFill.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    statusDot.className = 'status-dot complete';
+                    
+                    // Hide progress bar after completion
+                    setTimeout(() => {
+                        progressFill.parentElement.style.opacity = '0';
+                    }, 1000);
+                }
+            }, 200 + Math.random() * 300);
+        }
+
+        // Update file count
+        function updateFileCount() {
+            document.getElementById('fileCount').textContent = `${files.length} files`;
+        }
+
+        // Drop zone handlers
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            const droppedFiles = Array.from(e.dataTransfer.files);
+            droppedFiles.forEach(file => {
+                addFileToStack(file);
+            });
+        });
+
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const selectedFiles = Array.from(e.target.files);
+            selectedFiles.forEach(file => {
+                addFileToStack(file);
+            });
+        });
+
+        // Actions
+        function startUpload() {
+            files.forEach(fileData => {
+                simulateUpload(fileData.id);
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('fileList').innerHTML = '';
+            files.length = 0;
+            fileCounter = 0;
+            updateFileCount();
+        }
+
+        // Demo files
+        function addDemoFiles() {
+            const demoFiles = [
+                { name: 'project-report.pdf', size: 2400000, type: 'pdf' },
+                { name: 'hero-image.jpg', size: 1800000, type: 'img' },
+                { name: 'requirements.docx', size: 890000, type: 'doc' },
+                { name: 'data-export.csv', size: 1200000, type: 'txt' },
+                { name: 'presentation.pdf', size: 5600000, type: 'pdf' }
+            ];
+
+            demoFiles.forEach(file => {
+                setTimeout(() => addFileToStack(file, true), Math.random() * 1000);
+            });
+        }
+
+        // Initialize with demo
+        setTimeout(() => addDemoFiles(), 1000);
+    </script>
+</body>
+</html>

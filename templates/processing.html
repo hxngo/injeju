@@ -1,0 +1,732 @@
+{% extends "base.html" %}
+{% block title %}Processing - CORSS{% endblock %}
+{% block body %}
+<style>
+  html, body {
+    background: #111f2e;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+  body {
+    opacity: 1; transition: opacity 0.6s cubic-bezier(.5,.04,.27,1);
+  }
+  body.fade-out { opacity: 0; pointer-events:none; }
+  body.fade-in  { opacity: 1; }
+  .bg-blur-img {
+    position: fixed; top:0; left:0;
+    width:100vw; height:100vh;
+    object-fit: cover;
+    filter: brightness(0.53) blur(2px) grayscale(8%);
+    z-index:0;
+  }
+  .bg-overlay {
+    position:fixed; top:0; left:0;
+    width:100vw; height:100vh;
+    background:linear-gradient(120deg, rgba(20,40,70,0.82), rgba(10,36,70,0.91));
+    z-index:1;
+  }
+  .navbar {
+    position:fixed; top:0; left:0;
+    width:100%; height:80px;
+    background: linear-gradient(135deg, rgba(20, 30, 48, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(102, 252, 241, 0.1);
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0 40px; z-index:1002;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  }
+  
+  .navbar img { 
+    height:65px; cursor:pointer; 
+    transition: transform 0.3s ease;
+  }
+  
+  .navbar img:hover {
+    transform: scale(1.05);
+  }
+  
+  .navbar-links {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 12px;
+    border-radius: 50px;
+    border: 1px solid rgba(102, 252, 241, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-links a {
+    font-weight: 600; font-size: 0.95rem; color: #c1d9f0;
+    text-decoration: none; 
+    padding: 12px 20px;
+    border-radius: 25px; 
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    background: transparent !important;
+    border: 1px solid transparent;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+  
+  .navbar-links a::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.1) 0%, rgba(77, 225, 215, 0.15) 100%);
+    transition: left 0.5s ease;
+    border-radius: 25px;
+  }
+  
+  .navbar-links a:hover::before {
+    left: 0;
+  }
+  
+  .navbar-links a:hover {
+    color: #66fcf1;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.15) 0%, rgba(77, 225, 215, 0.1) 100%) !important;
+    border-color: rgba(102, 252, 241, 0.3);
+    text-shadow: 0 0 15px rgba(102, 252, 241, 0.6) !important;
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 25px rgba(102, 252, 241, 0.2),
+      0 0 0 1px rgba(102, 252, 241, 0.1) inset !important;
+    filter: none !important;
+  }
+  
+  .navbar-links a:active,
+  .navbar-links a:focus,
+  .navbar-links a.active {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    color: white !important;
+  }
+
+
+  .process-wrapper {
+    position:absolute; top:80px; left:0;
+    width:100%; height:calc(100vh - 80px);
+    display:flex; flex-direction:column; gap:15px;
+    padding:20px 30px; box-sizing:border-box;
+    z-index:1003;
+  }
+
+  .process-title {
+    font-size:1.8rem;
+    color:#5e5c5c;
+    font-weight:700;
+    margin-bottom:5px;
+  }
+
+  .progress-bar {
+    height:8px; background:#2a2f38; border-radius:4px;
+    overflow:hidden;
+    margin-bottom:10px;
+  }
+  .progress {
+    width:0%; height:100%; background:#66fcf1; transition:width 0.5s;
+  }
+
+  .steps-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .steps {
+    display:flex; justify-content:space-between;
+    position:relative; z-index:2;
+  }
+  .step {
+    flex:1; padding:10px;
+    border-radius:6px;
+    background:#1e2532; color:#ccc;
+    text-align:center; font-size:0.95rem;
+    transition: background 0.3s, color 0.3s;
+    margin: 0 10px;
+    position: relative;
+  }
+  .step:first-child { margin-left:0; }
+  .step:last-child { margin-right:0; }
+  .step.active {
+    background:#66fcf1;
+    color:#111;
+    font-weight:700;
+  }
+
+  .step-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: #2a2f38;
+    z-index:1;
+    transform: translateY(-50%);
+    border-radius:2px;
+  }
+  .step-line-progress {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 3px;
+    background: #66fcf1;
+    width: 0%;
+    z-index:1;
+    transform: translateY(-50%);
+    border-radius:2px;
+    transition: width 0.5s;
+  }
+
+  .process-content {
+    flex:1; display:flex; gap:20px;
+  }
+
+  .process-main {
+    flex:2; display:flex; gap:20px;
+  }
+  .process-image {
+    flex:1; background:#000; border-radius:10px; padding:10px;
+    display:flex; justify-content:center; align-items:center;
+    position: relative;
+  }
+  .process-image img { 
+    max-width:100%; 
+    max-height:100%; 
+    border-radius:6px; 
+    opacity:0;
+    transition: opacity 0.5s ease;
+  }
+  .process-image img.visible {
+    opacity:1;
+  }
+
+  /* 로딩 스피너 */
+  .loader {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #66fcf1;
+    border-radius: 50%;
+    width: 50px; height: 50px;
+    animation: spin 1s linear infinite;
+    position: absolute;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .process-log {
+    flex:1; background:#1b2028; border-radius:10px; padding:20px; color:#d5e4f8;
+    font-size:0.95rem; overflow-y:auto;
+    display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .keywords-box {
+    margin-top: 15px;
+    padding: 10px;
+    background: #232732;
+    border-radius: 6px;
+    color: #66fcf1;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  /* 하단 버튼 */
+  .next-button {
+    width: 100%;
+    margin-top: 20px;
+    background: #66fcf1;
+    color: #111;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.8s ease, background 0.3s;
+    text-align: center;
+    text-decoration: none;
+  }
+  .next-button.visible {
+    opacity: 1;
+  }
+  .next-button:hover {
+    background: #52d8d0;
+  }
+</style>
+
+<img class="bg-blur-img" src="{{ url_for('static', filename='images/back3.jpg') }}">
+<div class="bg-overlay"></div>
+
+<div class="navbar">
+  <div class="navbar-brand">
+    <img src="{{ url_for('static', filename='images/CORSS_logo_checked.png') }}">
+  </div>
+  <div class="navbar-links">
+    <a href="/">Home</a>
+    <a href="/upload">Upload</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </div>
+</div>
+
+<div class="process-wrapper">
+  <div class="process-title">PROCESSING...</div>
+  <div class="progress-bar"><div class="progress" id="progress"></div></div>
+
+  <div class="steps-wrapper">
+    <div class="step-line"></div>
+    <div class="step-line-progress" id="step-line-progress"></div>
+    <div class="steps">
+      <div class="step active" id="step1">1. Loading Image</div>
+      <div class="step" id="step2">2. Detecting Objects</div>
+      <div class="step" id="step3">3. Segmenting Image</div>
+      <div class="step" id="step4">4. Refining with SAM</div>
+    </div>
+  </div>
+
+  <div class="process-content">
+    <div class="process-main">
+      <div class="process-image">
+        <div class="loader" id="loader-main"></div>
+        <img id="main-image" src="">
+      </div>
+      <div class="process-image">
+        <div class="loader" id="loader-center"></div>
+        <img id="center-image" src="">
+      </div>
+    </div>
+    <div class="process-log">
+      <div>
+        <div class="log-text" id="process-log">
+          [INFO] Processing started...<br>
+        </div>
+        <div class="keywords-box" id="keywords-box">
+          <strong>키워드:</strong> [ - ]
+        </div>
+      </div>
+      <a href="/detail" class="next-button page-link" id="next-button">세부 옵션 설정하기</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const steps = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3'), document.getElementById('step4')];
+  const logBox = document.getElementById('process-log');
+  const mainImage = document.getElementById('main-image');
+  const centerImage = document.getElementById('center-image');
+  const loaderMain = document.getElementById('loader-main');
+  const loaderCenter = document.getElementById('loader-center');
+  const progress = document.getElementById('progress');
+  const stepLineProgress = document.getElementById('step-line-progress');
+  const nextButton = document.getElementById('next-button');
+
+  const mainImages = [
+    "",  
+    "{{ url_for('static', filename='images/arm.png') }}", 
+    "{{ url_for('static', filename='images/arm.png') }}",
+    "{{ url_for('static', filename='images/arm.png') }}"
+  ];
+  const centerImages = [
+    "", "", "", "{{ url_for('static', filename='images/processing_seg.png') }}"
+  ];
+  const logs = [
+    "[INFO] Image loaded...",
+    "[INFO] Objects detected: Box, Arm, Table...",
+    "[INFO] Segmenting image...",
+    "[INFO] Refining segmentation with SAM... Keywords: [팔, 박스, 테이블]"
+  ];
+
+  function showImage(imgElement, loaderElement, src) {
+    loaderElement.style.display = "block";
+    imgElement.classList.remove("visible");
+    if (src) {
+      imgElement.onload = () => {
+        loaderElement.style.display = "none";
+        imgElement.classList.add("visible");
+      };
+      imgElement.src = src;
+    }
+  }
+  document.addEventListener("DOMContentLoaded", function() {
+  document.body.classList.add("fade-in");
+  document.querySelectorAll('.page-link').forEach(function(btn){
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const href = btn.getAttribute('href');
+      document.body.classList.remove('fade-in');
+      document.body.classList.add('fade-out');
+      setTimeout(function() {
+        window.location.href = href;
+      }, 480); // transition 시간과 맞추세요 (0.6s 이면 600)
+    });
+  });
+});
+  // Processing sequence
+  const steps = document.querySelectorAll('.step');
+  const progress = document.getElementById('progress');
+  const stepLineProgress = document.getElementById('step-line-progress');
+  const nextButton = document.querySelector('.next-button');
+  const logBox = document.querySelector('.log-content');
+  
+  const logs = [
+    "📤 Initializing image upload...",
+    "🔍 Object detection started using YOLO model...",
+    "✂️ Image segmentation in progress...",
+    "🎯 SAM model refinement applied...",
+    "✅ Processing completed successfully!"
+  ];
+  
+  let step = 0;
+  function nextStep() {
+    if (step > 0) steps[step-1].classList.remove('active');
+    if (step < steps.length) {
+      steps[step].classList.add('active');
+      if (logBox) logBox.innerHTML += logs[step] + "<br>";
+      const percent = ((step+1)/steps.length*100);
+      progress.style.width = percent + "%";
+      stepLineProgress.style.width = percent + "%";
+      step++;
+      setTimeout(nextStep, 2000);
+    } else {
+      if (nextButton) nextButton.classList.add('visible');
+    }
+  }
+  nextStep();
+</script>
+
+<style>
+  /* Additional status styles */
+  .status-info { background: #66fcf1; }
+  .status-success { background: #4caf50; }
+  .status-warning { background: #ffd93d; }
+  .status-error { background: #ff6b6b; }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+  }
+  
+  /* Completion celebration */
+  .celebration {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4rem;
+    opacity: 0;
+    animation: celebrate 1s ease-out forwards;
+    pointer-events: none;
+    z-index: 100;
+  }
+  
+  @keyframes celebrate {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+  }
+</style>
+      <div class="step" id="step2">
+        <span class="status-indicator status-info"></span>
+        2. Detecting Objects
+      </div>
+      <div class="step" id="step3">
+        <span class="status-indicator status-info"></span>
+        3. Segmenting Image
+      </div>
+      <div class="step" id="step4">
+        <span class="status-indicator status-info"></span>
+        4. Refining with SAM
+      </div>
+    </div>
+  </div>
+
+  <div class="process-content">
+    <div class="process-main">
+      <div class="process-image">
+        <div class="loader" id="loader-main"></div>
+        <img id="main-image" src="">
+      </div>
+      <div class="process-image">
+        <div class="loader" id="loader-center"></div>
+        <img id="center-image" src="">
+      </div>
+    </div>
+    <div class="process-log">
+      <div>
+        <div class="log-text" id="process-log">
+          <div class="log-line" style="animation-delay: 0.2s;">
+            <span class="status-indicator status-info"></span>
+            [INFO] Processing started...
+          </div>
+        </div>
+        <div class="keywords-box" id="keywords-box">
+          <strong>🔍 키워드:</strong> <span id="keyword-list">[ 분석 중... ]</span>
+        </div>
+      </div>
+      <a href="/detail" class="next-button page-link" id="next-button">
+        ✨ 세부 옵션 설정하기
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Initialize elements
+  const steps = [
+    document.getElementById('step1'), 
+    document.getElementById('step2'), 
+    document.getElementById('step3'), 
+    document.getElementById('step4')
+  ];
+  const logBox = document.getElementById('process-log');
+  const mainImage = document.getElementById('main-image');
+  const centerImage = document.getElementById('center-image');
+  const loaderMain = document.getElementById('loader-main');
+  const loaderCenter = document.getElementById('loader-center');
+  const progress = document.getElementById('progress');
+  const stepLineProgress = document.getElementById('step-line-progress');
+  const nextButton = document.getElementById('next-button');
+  const keywordList = document.getElementById('keyword-list');
+
+  // Enhanced data arrays
+  const mainImages = [
+    "",  
+    "{{ url_for('static', filename='images/arm.png') }}", 
+    "{{ url_for('static', filename='images/arm.png') }}",
+    "{{ url_for('static', filename='images/arm.png') }}"
+  ];
+  
+  const centerImages = [
+    "", 
+    "", 
+    "", 
+    "{{ url_for('static', filename='images/processing_seg.png') }}"
+  ];
+  
+  const logs = [
+    {
+      text: "[INFO] 🔄 Image loaded successfully...",
+      status: "success",
+      delay: 0
+    },
+    {
+      text: "[INFO] 🎯 Objects detected: Box, Arm, Table...",
+      status: "success", 
+      delay: 0.2
+    },
+    {
+      text: "[INFO] ✂️ Segmenting image regions...",
+      status: "info",
+      delay: 0.4
+    },
+    {
+      text: "[INFO] 🎨 Refining segmentation with SAM...",
+      status: "success",
+      delay: 0.6
+    },
+    {
+      text: "[SUCCESS] ✅ Processing completed!",
+      status: "success", 
+      delay: 0.8
+    }
+  ];
+  
+  const keywords = [
+    "[ 분석 중... ]",
+    "[ 로봇팔, 객체 ]",
+    "[ 로봇팔, 상자, 테이블 ]",
+    "[ 팔, 박스, 테이블, 그리퍼 ]"
+  ];
+
+  let logIndex = 0;
+
+  function addLogLine(logData) {
+    const logLine = document.createElement('div');
+    logLine.className = 'log-line';
+    logLine.style.animationDelay = logData.delay + 's';
+    
+    const statusClass = `status-${logData.status}`;
+    logLine.innerHTML = `
+      <span class="status-indicator ${statusClass}"></span>
+      ${logData.text}
+    `;
+    
+    logBox.appendChild(logLine);
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  function showImage(imgElement, loaderElement, src) {
+    if (!src) return;
+    
+    // Show loader
+    loaderElement.style.display = "block";
+    imgElement.classList.remove("visible");
+    
+    // Preload image
+    const tempImg = new Image();
+    tempImg.onload = () => {
+      // Hide loader with animation
+      loaderElement.style.opacity = '0';
+      setTimeout(() => {
+        loaderElement.style.display = "none";
+        loaderElement.style.opacity = '1';
+      }, 300);
+      
+      // Show image with animation
+      imgElement.src = src;
+      setTimeout(() => {
+        imgElement.classList.add("visible");
+      }, 100);
+    };
+    tempImg.src = src;
+  }
+
+  function updateStepStatus(stepIndex, status = 'active') {
+    const step = steps[stepIndex];
+    if (!step) return;
+    
+    const indicator = step.querySelector('.status-indicator');
+    
+    // Remove previous status classes
+    indicator.classList.remove('status-info', 'status-success', 'status-warning', 'status-error');
+    step.classList.remove('active', 'completed');
+    
+    if (status === 'completed') {
+      step.classList.add('completed');
+      indicator.classList.add('status-success');
+    } else {
+      step.classList.add('active');
+      indicator.classList.add('status-info');
+    }
+  }
+
+  let step = 0;
+  function nextStep() {
+    if (step > 0) {
+      // Mark previous step as completed
+      updateStepStatus(step - 1, 'completed');
+    }
+    
+    if (step < steps.length) {
+      // Activate current step
+      updateStepStatus(step, 'active');
+      
+      // Show images
+      if (mainImages[step]) {
+        showImage(mainImage, loaderMain, mainImages[step]);
+      }
+      if (centerImages[step]) {
+        showImage(centerImage, loaderCenter, centerImages[step]);
+      }
+      
+      // Add log entry
+      if (logs[step]) {
+        setTimeout(() => {
+          addLogLine(logs[step]);
+        }, 500);
+      }
+      
+      // Update keywords
+      keywordList.textContent = keywords[step] || keywords[keywords.length - 1];
+      
+      // Update progress
+      const percent = ((step + 1) / steps.length * 100);
+      progress.style.width = percent + "%";
+      stepLineProgress.style.width = percent + "%";
+      
+      step++;
+      
+      // Continue to next step or finish
+      if (step < steps.length) {
+        setTimeout(nextStep, 2500); // Slower progression for better UX
+      } else {
+        // All steps completed
+        setTimeout(() => {
+          updateStepStatus(steps.length - 1, 'completed');
+          
+          // Add completion log
+          addLogLine({
+            text: "[COMPLETE] 🎉 All processing steps finished!",
+            status: "success",
+            delay: 0
+          });
+          
+          // Show celebration
+          const celebration = document.createElement('div');
+          celebration.className = 'celebration';
+          celebration.textContent = '🎉';
+          document.body.appendChild(celebration);
+          
+          setTimeout(() => {
+            celebration.remove();
+          }, 1000);
+          
+          // Show next button
+          setTimeout(() => {
+            nextButton.classList.add('visible');
+            
+            // Add particle effect
+            if (window.ReactBitsAnimations) {
+              ReactBitsAnimations.createParticleBackground(nextButton.parentElement, {
+                particleCount: 10,
+                speed: 20,
+                particleColor: '#66fcf1'
+              });
+            }
+          }, 500);
+          
+        }, 1000);
+      }
+    }
+  }
+
+  // Enhanced page transitions
+  document.querySelectorAll('.page-link').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const href = btn.getAttribute('href');
+      
+      // Add loading state
+      btn.innerHTML = `
+        <div class="loader-enhanced" style="width: 20px; height: 20px; margin: 0 auto;"></div>
+        <span style="margin-left: 10px;">Loading...</span>
+      `;
+      btn.style.pointerEvents = 'none';
+      
+      // Page transition
+      document.body.classList.remove('fade-in');
+      document.body.classList.add('fade-out');
+      
+      setTimeout(function() {
+        window.location.href = href;
+      }, 800);
+    });
+  });
+
+  // Initialize page
+  document.body.classList.add("fade-in");
+  
+  // Add particle background
+  setTimeout(() => {
+    if (window.ReactBitsAnimations) {
+      ReactBitsAnimations.createParticleBackground(document.body, {
+        particleCount: 25,
+        speed: 30,
+        particleColor: 'rgba(102, 252, 241, 0.3)'
+      });
+    }
+  }, 1000);
+  
+  // Start processing sequence
+  setTimeout(nextStep, 1000);
+});
+</script>
+{% endblock %}

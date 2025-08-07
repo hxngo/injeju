@@ -1,0 +1,202 @@
+: progress-shine 2s ease-in-out infinite;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-enhanced .progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(255,255,255,0.3) 50%, 
+    transparent 70%);
+  animation: progress-gloss 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-shine {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes progress-gloss {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 7. File Drop Zone Enhanced */
+.file-drop-enhanced {
+  position: relative;
+  background: linear-gradient(145deg, #1b2028, #252b35);
+  border: 2px dashed #8be0ff;
+  border-radius: 15px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+}
+
+.file-drop-enhanced::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(102, 252, 241, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.file-drop-enhanced:hover::before {
+  opacity: 1;
+}
+
+.file-drop-enhanced:hover {
+  border-color: #66fcf1;
+  background: linear-gradient(145deg, #202630, #2a3440);
+  transform: scale(1.02);
+  box-shadow: 0 10px 30px rgba(102, 252, 241, 0.2);
+}
+
+.file-drop-enhanced.dragover {
+  border-color: #4de1d7;
+  background: linear-gradient(145deg, #2a3440, #34424f);
+  transform: scale(1.05);
+  box-shadow: 0 15px 40px rgba(102, 252, 241, 0.3);
+}
+
+/* 8. Glow Effects */
+.glow-text {
+  color: #66fcf1;
+  text-shadow: 
+    0 0 5px #66fcf1,
+    0 0 10px #66fcf1,
+    0 0 15px #66fcf1,
+    0 0 20px #66fcf1;
+  animation: glow-pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow-pulse {
+  from {
+    text-shadow: 
+      0 0 5px #66fcf1,
+      0 0 10px #66fcf1,
+      0 0 15px #66fcf1,
+      0 0 20px #66fcf1;
+  }
+  to {
+    text-shadow: 
+      0 0 2px #66fcf1,
+      0 0 5px #66fcf1,
+      0 0 8px #66fcf1,
+      0 0 12px #66fcf1;
+  }
+}
+
+/* 9. SVG Click Animation */
+.svg-part-animated {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.svg-part-animated:hover {
+  filter: drop-shadow(0 0 10px #66fcf1);
+  transform: scale(1.05);
+}
+
+.svg-part-animated.clicked {
+  animation: svg-click-pulse 0.6s ease-out;
+}
+
+@keyframes svg-click-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 20px #66fcf1); }
+  100% { transform: scale(1.05); filter: drop-shadow(0 0 10px #66fcf1); }
+}
+
+/* 🚀 Lightweight Interactive Elements - NO HEAVY CURSOR OVERRIDES */
+
+/* Enhanced button interactions */
+.btn-enhanced,
+.upload-btn,
+.next-button,
+.file-btn {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Navigation links */
+.navbar-links a {
+  position: relative;
+}
+
+/* File items */
+.file-item {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Image and video elements */
+img, video {
+  transition: all 0.2s ease;
+}
+
+/* Logo with hover interaction */
+.navbar-brand img,
+.navbar-logo {
+  transition: transform 0.3s ease;
+}
+
+/* File drop zone enhancement */
+.file-drop {
+  position: relative;
+}
+
+/* Step elements */
+.step {
+  transition: all 0.2s ease;
+}
+
+/* Preview display area */
+.preview-display {
+  transition: all 0.15s ease-out;
+}
+
+/* Enhanced hover effects */
+.magnetic-element {
+  transition: transform 0.2s ease-out;
+}
+
+.magnetic-element:hover {
+  transform: scale(1.02);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  /* Restore hover effects on mobile */
+  .btn-enhanced:hover,
+  .upload-btn:hover,
+  .navbar-links a:hover {
+    cursor: pointer !important;
+  }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  .glow-text {
+    color: #ffffff;
+    text-shadow: 
+      0 0 5px #ffffff,
+      0 0 10px #ffffff;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
