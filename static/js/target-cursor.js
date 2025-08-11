@@ -1,6 +1,40 @@
 // 🧲 Enhanced Magnetic Target Cursor - 요소 인식 개선
 document.addEventListener('DOMContentLoaded', function() {
   
+  // 🎯 강제로 기본 커서 완전히 숨기기
+  function hideDefaultCursor() {
+    // CSS로 모든 요소의 커서 숨기기
+    const style = document.createElement('style');
+    style.innerHTML = `
+      html, body, *, *::before, *::after {
+        cursor: none !important;
+      }
+      input, textarea, select, button, a, div, span, p, h1, h2, h3, h4, h5, h6 {
+        cursor: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // JavaScript로도 강제 적용
+    document.body.style.cursor = 'none';
+    document.documentElement.style.cursor = 'none';
+    
+    // 모든 요소에 강제 적용
+    const allElements = document.querySelectorAll('*');
+    allElements.forEach(el => {
+      el.style.cursor = 'none';
+    });
+  }
+  
+  // 즉시 실행
+  hideDefaultCursor();
+  
+  // DOM 변경 시에도 재적용
+  const cursorObserver = new MutationObserver(() => {
+    hideDefaultCursor();
+  });
+  cursorObserver.observe(document.body, { childList: true, subtree: true });
+  
   // 커서 HTML 구조 생성
   const cursorWrapper = document.createElement('div');
   cursorWrapper.className = 'target-cursor-wrapper';

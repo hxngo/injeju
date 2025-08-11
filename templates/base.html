@@ -33,6 +33,36 @@
       height: 100%;
       width: 100vw;
       overflow: hidden;
+      cursor: none !important;
+    }
+    
+    /* 🎯 기본 커서 완전히 제거 - 최고 우선순위 */
+    html {
+      cursor: none !important;
+    }
+    
+    body {
+      cursor: none !important;
+    }
+    
+    /* 모든 요소에서 기본 커서 완전히 숨기기 */
+    *, *::before, *::after {
+      cursor: none !important;
+    }
+    
+    /* 모든 인터랙티브 요소에서 커서 숨기기 */
+    input, textarea, select, button, a, div, span, p, h1, h2, h3, h4, h5, h6 {
+      cursor: none !important;
+    }
+    
+    /* 네비게이션 요소들 */
+    .navbar, .navbar *, .nav-link, .nav-text, .navbar-brand {
+      cursor: none !important;
+    }
+    
+    /* 추가 보안 - 모든 클래스와 ID */
+    [class], [id] {
+      cursor: none !important;
     }
 
     /* Ultra-Modern Navigation Styles */
@@ -390,8 +420,8 @@
   <!-- React Bits Animations -->
   <script src="{{ url_for('static', filename='js/react-bits-animations.js') }}"></script>
   
-  <!-- React Bits Target Cursor -->
-  <script src="{{ url_for('static', filename='js/react-bits-target-cursor.js') }}"></script>
+  <!-- React Bits Target Cursor - DISABLED (큰 바깥쪽 커서 제거) -->
+  <!-- <script src="{{ url_for('static', filename='js/react-bits-target-cursor.js') }}"></script> -->
   
   <!-- Metallic Paint Effect (Lite Version) -->
   <script src="{{ url_for('static', filename='js/metallic-paint-lite.js') }}"></script>
@@ -498,34 +528,9 @@
       }
     });
   </script>
+  
+  <!-- Target Cursor JavaScript -->
+  <script src="{{ url_for('static', filename='js/target-cursor.js') }}"></script>
+  
 </body>
 </html>
-        font-size: 1.8rem;
-      }
-      
-      .brand-subtitle {
-        font-size: 0.65rem;
-      }
-      
-      .nav-wrapper {
-        gap: 8px;
-        padding: 6px 12px;
-      }
-      
-      .nav-link {
-        padding: 10px 14px;
-      }
-      
-      .nav-icon {
-        font-size: 1rem;
-      }
-      
-      .nav-text {
-        font-size: 0.75rem;
-      }
-    }
-
-    .plain-text { 
-      color: #e2f4ff; font-weight: 900; font-size: 2.0rem;
-      text-shadow: 0 0 20px rgba(226, 244, 255, 0.3);
-    }

@@ -13,10 +13,32 @@ def index():
 def index2():
     return render_template('index2.html')
 
-# 처리 페이지
+# 1. '분석 완료' 페이지
+# 'processing-fixed.html'을 렌더링합니다.
+@app.route('/analysis-complete')
+def analysis_complete():
+    return render_template('processing-fixed.html')
+
+# 2. '워크플로우 애니메이션' 페이지
+# 'processing-fixed.html'의 버튼을 누르면 이 경로로 이동합니다.
+# 'workflow-designer.html'을 렌더링하도록 수정했습니다.
 @app.route('/processing')
 def processing():
-    return render_template('processing-fixed.html')
+    return render_template('workflow-designer.html')
+
+# AI 에이전트 파이프라인 페이지 (독립형)
+@app.route('/pipeline')
+def pipeline():
+    return render_template('pipeline-standalone.html')
+
+# N8N 스타일 워크플로우 디자이너
+@app.route('/workflow')
+def workflow():
+    return render_template('workflow-designer.html')
+
+@app.route('/simple-workflow')
+def simple_workflow():
+    return render_template('workflow-simple.html')
 
 # 상세 페이지
 @app.route('/detail')
@@ -76,7 +98,7 @@ def icon_test():
 # LightRays 테스트 페이지
 @app.route('/lightrays-test')
 def lightrays_test():
-    return render_template('lightrays_test.html')
+    return render_template('lightrays-test.html')
 
 # 간단한 업로드 테스트 페이지
 @app.route('/upload-test')
@@ -99,4 +121,5 @@ def upload_standalone():
     return render_template('upload-standalone.html')
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    # 포트 충돌을 피하기 위해 5002번 포트를 사용합니다.
+    app.run(host="0.0.0.0", port=5002, debug=True)

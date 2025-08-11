@@ -1,0 +1,595 @@
+{% extends "base.html" %}
+{% block title %}AI Workflow - CORSS{% endblock %}
+{% block body %}
+<style>
+    /* Global Styles from theme */
+    html, body {
+        background: #111f2e;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        overflow: hidden; /* Prevent body scroll */
+    }
+    body {
+        opacity: 0; 
+        transition: opacity 0.6s cubic-bezier(.5,.04,.27,1);
+    }
+    body.fade-out { 
+        opacity: 0; 
+        pointer-events: none; 
+    }
+    body.fade-in { 
+        opacity: 1; 
+    }
+    .bg-blur-img {
+        position: fixed; top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        object-fit: cover;
+        filter: brightness(0.53) blur(2px) grayscale(8%);
+        z-index: 0;
+    }
+    .bg-overlay {
+        position: fixed; top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: linear-gradient(120deg, rgba(20,40,70,0.82), rgba(10,36,70,0.91));
+        z-index: 1;
+    }
+    .navbar {
+        position: fixed; top: 0; left: 0;
+        width: 100%; height: 80px;
+        background: linear-gradient(135deg, rgba(20, 30, 48, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+        backdrop-filter: blur(20px) saturate(180%);
+        border-bottom: 1px solid rgba(102, 252, 241, 0.1);
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0 40px; z-index: 1002;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+    }
+    .navbar img { height: 65px; cursor: pointer; transition: transform 0.3s ease; }
+    .navbar img:hover { transform: scale(1.05); }
+    .navbar-links { display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.03); padding: 8px 12px; border-radius: 50px; border: 1px solid rgba(102, 252, 241, 0.1); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
+    .navbar-links a { font-weight: 600; font-size: 0.95rem; color: #c1d9f0; text-decoration: none; padding: 12px 20px; border-radius: 25px; transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .navbar-links a:hover { color: #66fcf1; background: linear-gradient(135deg, rgba(102, 252, 241, 0.15) 0%, rgba(77, 225, 215, 0.1) 100%); text-shadow: 0 0 15px rgba(102, 252, 241, 0.6); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 252, 241, 0.2); }
+
+    /* Workflow Designer Dark Theme */
+    .workflow-canvas {
+        position: absolute; top: 80px; left: 0;
+        width: 100vw; height: calc(100vh - 80px);
+        background: transparent; /* Use theme background */
+        z-index: 10;
+        overflow: hidden;
+        cursor: grab;
+    }
+
+    .canvas-container {
+        position: absolute; top: 0; left: 0;
+        width: 100%; height: 100%;
+        transform-origin: 0 0;
+    }
+
+    .toolbar {
+        position: absolute; top: 30px; left: 50%;
+        transform: translateX(-50%);
+        background: rgba(20, 30, 48, 0.85);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 8px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        display: flex; align-items: center; gap: 8px;
+        z-index: 1000;
+        border: 1px solid rgba(102, 252, 241, 0.2);
+    }
+
+    .toolbar-btn {
+        padding: 10px 15px; border: none;
+        background: rgba(102, 252, 241, 0.1);
+        color: #66fcf1;
+        border-radius: 8px; cursor: pointer;
+        font-size: 14px; font-weight: 600;
+        transition: all 0.2s ease;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .toolbar-btn:hover { background: rgba(102, 252, 241, 0.2); }
+    .toolbar-btn:disabled {
+        background: rgba(102, 252, 241, 0.05);
+        color: rgba(102, 252, 241, 0.4);
+        cursor: not-allowed;
+    }
+    .toolbar-btn.final-result {
+        background: #66fcf1;
+        color: #111f2e;
+        display: none; /* Initially hidden */
+        font-weight: 700;
+    }
+    .toolbar-btn.final-result:hover {
+        background: #8cfff9;
+    }
+
+    .workflow-node {
+        position: absolute;
+        background: rgba(20, 30, 48, 0.9);
+        border: 2px solid rgba(102, 252, 241, 0.2);
+        backdrop-filter: blur(8px);
+        border-radius: 12px; padding: 16px;
+        width: 220px; min-height: 80px;
+        cursor: move; transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        user-select: none;
+    }
+    .workflow-node:hover { border-color: #66fcf1; transform: translateY(-2px); }
+    .workflow-node.dragging { transform: rotate(2deg) scale(1.05); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); z-index: 1001; cursor: grabbing; }
+    .workflow-node.active { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4), 0 4px 20px rgba(0, 0, 0, 0.3); }
+    .workflow-node.completed { border-color: #22c55e; background: rgba(16, 185, 129, 0.15); }
+    
+    .node-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .node-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(102, 252, 241, 0.1); }
+    .node-title { color: #e2e8f0; font-weight: 600; font-size: 14px; }
+    .node-subtitle, .node-content { color: #94a3b8; font-size: 12px; }
+    .support-components { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .support-item { background: rgba(102, 252, 241, 0.1); border: 1px solid rgba(102, 252, 241, 0.2); border-radius: 6px; padding: 6px 8px; font-size: 10px; font-weight: 500; color: #66fcf1; text-align: center; }
+
+    .connection-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+    .connection-line { stroke: rgba(148, 163, 184, 0.5); stroke-width: 2.5; fill: none; }
+    .connection-arrow { fill: rgba(148, 163, 184, 0.5); }
+    .connection-line.loop { stroke: #f59e0b; stroke-dasharray: 6, 6; }
+    .connection-arrow.loop { fill: #f59e0b; }
+    
+    .toast-notification { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: rgba(20, 30, 48, 0.9); color: white; padding: 14px 24px; border-radius: 10px; box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2); font-size: 14px; font-weight: 500; z-index: 9999; transition: bottom 0.5s ease-in-out; backdrop-filter: blur(5px); border: 1px solid rgba(102, 252, 241, 0.2); }
+    .toast-notification.show { bottom: 30px; }
+    
+    .confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1002; }
+    .confetti-particle { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; background: #10b981; border-radius: 50%; opacity: 0; animation: confetti-burst 1.2s ease-out forwards; }
+    @keyframes confetti-burst { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(var(--x-end), var(--y-end)) scale(0); opacity: 0; } }
+</style>
+
+<img class="bg-blur-img" src="{{ url_for('static', filename='images/back3.jpg') }}">
+<div class="bg-overlay"></div>
+
+<div class="navbar">
+  <div class="navbar-brand">
+    <img src="{{ url_for('static', filename='images/CORSS_logo_checked.png') }}" alt="CORSS Logo">
+  </div>
+  <div class="navbar-links">
+    <a href="/">Home</a>
+    <a href="/upload">Upload</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </div>
+</div>
+
+<div class="workflow-canvas" id="canvas">
+    <div class="toolbar">
+        <button class="toolbar-btn" id="add-node-btn">➕ Add Node</button>
+        <div class="toolbar-separator"></div>
+        <button class="toolbar-btn" id="start-workflow">▶️ Run</button>
+        <button class="toolbar-btn" id="pause-workflow" disabled>⏸️ Pause</button>
+        <button class="toolbar-btn" id="reset-workflow">🔄 Reset</button>
+        <div class="toolbar-separator"></div>
+        <button class="toolbar-btn" id="zoom-out">－</button>
+        <span id="zoom-level">100%</span>
+        <button class="toolbar-btn" id="zoom-in">＋</button>
+        <button class="toolbar-btn" id="fit-view">📐 Fit</button>
+        <a href="/detail" id="view-results-btn" class="toolbar-btn final-result page-link" style="display: none;">View Results →</a>
+    </div>
+    <div class="canvas-container" id="canvas-container">
+        <svg class="connection-svg" id="connection-svg"></svg>
+        <!-- Initial Nodes -->
+        <div class="workflow-node node-plan" style="top: 250px; left: 50px;" data-node-id="plan1">
+            <div class="node-header"><div class="node-icon">🧠</div><div><div class="node-title">Plan LLM</div><div class="node-subtitle">실행 계획 생성</div></div></div>
+            <div class="node-content">요구사항을 분석하여 초기 실행 계획 토큰을 생성합니다.</div>
+        </div>
+        <div class="workflow-node node-generation" style="top: 250px; left: 320px;" data-node-id="generation">
+            <div class="node-header"><div class="node-icon">🎯</div><div><div class="node-title">Generation Agent</div><div class="node-subtitle">멀티모달 허브</div></div></div>
+            <div class="node-content">• Cosmos-Predict2<br>• Cosmos-Transfer<br>• Llama-3-8B</div>
+        </div>
+        <div class="workflow-node node-predict" style="top: 450px; left: 320px;" data-node-id="predict">
+            <div class="node-header"><div class="node-icon">🎬</div><div><div class="node-title">Video Generation</div><div class="node-subtitle">Cosmos-Predict2</div></div></div>
+            <div class="node-content">비디오 콘텐츠를 생성하고 Generation Agent로 결과를 반환합니다.</div>
+        </div>
+        <div class="workflow-node node-plan" style="top: 250px; left: 590px;" data-node-id="plan2">
+            <div class="node-header"><div class="node-icon">🧠</div><div><div class="node-title">Plan LLM</div><div class="node-subtitle">계획 수정</div></div></div>
+            <div class="node-content">생성 결과를 바탕으로 계획 토큰을 수정합니다.</div>
+        </div>
+        <div class="workflow-node node-controlnet" style="top: 250px; left: 860px;" data-node-id="controlnet">
+            <div class="node-header"><div class="node-icon">🎛️</div><div><div class="node-title">ControlNet</div><div class="node-subtitle">세부 제어</div></div></div>
+            <div class="node-content">생성 프로세스를 세밀하게 제어합니다.</div>
+        </div>
+        <div class="workflow-node node-support" style="top: 250px; left: 1130px;" data-node-id="support">
+            <div class="node-header"><div class="node-icon">🛠️</div><div><div class="node-title">Support Agent</div><div class="node-subtitle">멀티 컴포넌트 시스템</div></div></div>
+            <div class="support-components">
+                <div class="support-item">Google-T5</div><div class="support-item">Llama-Guard</div>
+                <div class="support-item">ControlNet Models</div><div class="support-item">Cosmos-Guardrail</div>
+                <div class="support-item">Cosmos-Reason</div><div class="support-item">SAM2</div>
+            </div>
+        </div>
+        <div class="workflow-node node-result" style="top: 250px; left: 1460px;" data-node-id="result">
+            <div class="node-header"><div class="node-icon">✨</div><div><div class="node-title">Final Result</div><div class="node-subtitle">최종 결과물</div></div></div>
+            <div class="node-content">모든 처리 결과를 통합하여 최종 결과물을 출력합니다.</div>
+        </div>
+    </div>
+</div>
+<div id="toast" class="toast-notification"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.body.classList.add("fade-in");
+
+    class WorkflowDesigner {
+        constructor() {
+            this.canvas = document.getElementById('canvas');
+            this.container = document.getElementById('canvas-container');
+            this.svg = document.getElementById('connection-svg');
+            this.nodes = {};
+            this.connections = [
+                { from: 'plan1', to: 'generation', type: 'normal' },
+                { from: 'generation', to: 'predict', type: 'normal' },
+                { from: 'predict', to: 'generation', type: 'loop' },
+                { from: 'generation', to: 'plan2', type: 'normal' },
+                { from: 'plan2', to: 'controlnet', type: 'normal' },
+                { from: 'controlnet', to: 'support', type: 'normal' },
+                { from: 'support', to: 'result', type: 'normal' },
+            ];
+            this.zoom = 1;
+            this.panX = 0;
+            this.panY = 0;
+            this.isPanning = false;
+            this.lastPanPoint = { x: 0, y: 0 };
+            this.isDragging = false;
+            this.draggedNode = null;
+            this.dragOffset = { x: 0, y: 0 };
+            this.isRunning = false;
+            this.currentStep = -1;
+            this.workflowExecutionOrder = ['plan1', 'generation', 'predict', 'generation', 'plan2', 'controlnet', 'support', 'result'];
+            this.nodeCounter = 0;
+            this.init();
+        }
+
+        init() {
+            this.collectInitialNodes();
+            this.setupEventListeners();
+            this.updateAllConnections();
+            this.fitView();
+        }
+
+        collectInitialNodes() {
+            const nodeElements = this.container.querySelectorAll('.workflow-node');
+            nodeElements.forEach(nodeEl => {
+                const id = nodeEl.dataset.nodeId;
+                this.nodes[id] = {
+                    el: nodeEl, id: id,
+                    x: parseFloat(nodeEl.style.left), y: parseFloat(nodeEl.style.top),
+                    width: nodeEl.offsetWidth, height: nodeEl.offsetHeight,
+                };
+                this.makeNodeDraggable(nodeEl);
+                this.nodeCounter++;
+            });
+        }
+
+        setupEventListeners() {
+            this.canvas.addEventListener('mousedown', this.startPan.bind(this));
+            this.canvas.addEventListener('mousemove', this.pan.bind(this));
+            this.canvas.addEventListener('mouseup', this.endPan.bind(this));
+            this.canvas.addEventListener('mouseleave', this.endPan.bind(this));
+            this.canvas.addEventListener('wheel', this.zoomCanvas.bind(this), { passive: false });
+            document.getElementById('zoom-in').addEventListener('click', () => this.zoomAtCenter(1.2));
+            document.getElementById('zoom-out').addEventListener('click', () => this.zoomAtCenter(0.8));
+            document.getElementById('fit-view').addEventListener('click', this.fitView.bind(this));
+            document.getElementById('add-node-btn').addEventListener('click', this.addNode.bind(this));
+            document.getElementById('start-workflow').addEventListener('click', this.startWorkflow.bind(this));
+            document.getElementById('pause-workflow').addEventListener('click', this.pauseWorkflow.bind(this));
+            document.getElementById('reset-workflow').addEventListener('click', this.resetWorkflow.bind(this));
+        }
+
+        addNode() {
+            this.nodeCounter++;
+            const newNodeId = `newNode_${this.nodeCounter}`;
+            const nodeEl = document.createElement('div');
+            nodeEl.className = 'workflow-node node-new';
+            nodeEl.dataset.nodeId = newNodeId;
+            const canvasRect = this.canvas.getBoundingClientRect();
+            const centerX = (canvasRect.width / 2 - this.panX) / this.zoom;
+            const centerY = (canvasRect.height / 2 - this.panY) / this.zoom;
+            nodeEl.style.left = `${centerX - 110}px`;
+            nodeEl.style.top = `${centerY - 40}px`;
+            nodeEl.innerHTML = `<div class="node-header"><div class="node-icon">💡</div><div><div class="node-title">New Node</div><div class="node-subtitle">Select type</div></div></div><div class="node-content">Add node settings here.</div>`;
+            this.container.appendChild(nodeEl);
+            this.nodes[newNodeId] = {
+                el: nodeEl, id: newNodeId,
+                x: parseFloat(nodeEl.style.left), y: parseFloat(nodeEl.style.top),
+                width: nodeEl.offsetWidth, height: nodeEl.offsetHeight,
+            };
+            this.makeNodeDraggable(nodeEl);
+            this.showToast('✨ New node added!');
+        }
+
+        makeNodeDraggable(nodeEl) {
+            nodeEl.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                this.startDrag(e, nodeEl);
+            });
+        }
+
+        startDrag(e, nodeEl) {
+            if (this.isRunning) return;
+            this.isDragging = true;
+            this.draggedNode = this.nodes[nodeEl.dataset.nodeId];
+            const mouseX = e.clientX / this.zoom;
+            const mouseY = e.clientY / this.zoom;
+            this.dragOffset.x = mouseX - this.draggedNode.x;
+            this.dragOffset.y = mouseY - this.draggedNode.y;
+            this.draggedNode.el.classList.add('dragging');
+            this.onDragMove = this.drag.bind(this);
+            this.onDragEnd = this.endDrag.bind(this);
+            document.addEventListener('mousemove', this.onDragMove);
+            document.addEventListener('mouseup', this.onDragEnd, { once: true });
+        }
+
+        drag(e) {
+            if (!this.isDragging) return;
+            e.preventDefault();
+            const mouseX = e.clientX / this.zoom;
+            const mouseY = e.clientY / this.zoom;
+            this.draggedNode.x = mouseX - this.dragOffset.x;
+            this.draggedNode.y = mouseY - this.dragOffset.y;
+            this.draggedNode.el.style.left = `${this.draggedNode.x}px`;
+            this.draggedNode.el.style.top = `${this.draggedNode.y}px`;
+            this.updateAllConnections();
+        }
+
+        endDrag() {
+            if (!this.isDragging) return;
+            this.draggedNode.el.classList.remove('dragging');
+            this.isDragging = false;
+            this.draggedNode = null;
+            document.removeEventListener('mousemove', this.onDragMove);
+        }
+
+        startPan(e) {
+            if (e.target !== this.canvas && e.target !== this.container) return;
+            this.isPanning = true;
+            this.canvas.style.cursor = 'grabbing';
+            this.lastPanPoint = { x: e.clientX, y: e.clientY };
+        }
+
+        pan(e) {
+            if (!this.isPanning) return;
+            const dx = e.clientX - this.lastPanPoint.x;
+            const dy = e.clientY - this.lastPanPoint.y;
+            this.panX += dx;
+            this.panY += dy;
+            this.lastPanPoint = { x: e.clientX, y: e.clientY };
+            this.updateTransform();
+        }
+
+        endPan() {
+            this.isPanning = false;
+            this.canvas.style.cursor = 'grab';
+        }
+
+        zoomCanvas(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            const rect = this.canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            this.zoomAt(mouseX, mouseY, delta);
+        }
+
+        zoomAt(x, y, delta) {
+            const oldZoom = this.zoom;
+            const newZoom = Math.max(0.2, Math.min(3, oldZoom * delta));
+            this.panX = x - (x - this.panX) * (newZoom / oldZoom);
+            this.panY = y - (y - this.panY) * (newZoom / oldZoom);
+            this.zoom = newZoom;
+            this.updateTransform();
+            this.updateZoomDisplay();
+        }
+        
+        zoomAtCenter(delta) {
+            const rect = this.canvas.getBoundingClientRect();
+            this.zoomAt(rect.width / 2, rect.height / 2, delta);
+        }
+
+        updateTransform() {
+            this.container.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
+        }
+        
+        updateZoomDisplay() {
+            document.getElementById('zoom-level').textContent = `${Math.round(this.zoom * 100)}%`;
+        }
+
+        fitView() {
+            if (Object.keys(this.nodes).length === 0) return;
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const id in this.nodes) {
+                const node = this.nodes[id];
+                minX = Math.min(minX, node.x); minY = Math.min(minY, node.y);
+                maxX = Math.max(maxX, node.x + node.width); maxY = Math.max(maxY, node.y + node.height);
+            }
+            const contentWidth = maxX - minX; const contentHeight = maxY - minY;
+            const canvasRect = this.canvas.getBoundingClientRect(); const padding = 100;
+            const scaleX = (canvasRect.width - padding * 2) / contentWidth;
+            const scaleY = (canvasRect.height - padding * 2) / contentHeight;
+            this.zoom = Math.min(scaleX, scaleY, 1.5);
+            const newContentWidth = contentWidth * this.zoom; const newContentHeight = contentHeight * this.zoom;
+            this.panX = (canvasRect.width - newContentWidth) / 2 - minX * this.zoom;
+            this.panY = (canvasRect.height - newContentHeight) / 2 - minY * this.zoom;
+            this.updateTransform(); this.updateZoomDisplay();
+        }
+
+        updateAllConnections() {
+            this.svg.innerHTML = '';
+            this.connections.forEach(conn => {
+                const fromNode = this.nodes[conn.from];
+                const toNode = this.nodes[conn.to];
+                if (fromNode && toNode) this.drawConnection(fromNode, toNode, conn.type);
+            });
+        }
+
+        drawConnection(fromNode, toNode, type) {
+            const from = { x: fromNode.x, y: fromNode.y, w: fromNode.width, h: fromNode.height };
+            const to = { x: toNode.x, y: toNode.y, w: toNode.width, h: toNode.height };
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            let path, arrow;
+            if (type === 'loop') {
+                const p1 = { x: from.x + from.w * 0.25, y: from.y + from.h };
+                const p2 = { x: to.x + to.w * 0.75, y: to.y + to.h };
+                const curve = `M ${p1.x} ${p1.y} C ${p1.x} ${p1.y + 80}, ${p2.x} ${p2.y + 80}, ${p2.x} ${p2.y}`;
+                path = this.createPath(curve, type);
+                arrow = this.createArrow(p2, { x: p2.x, y: p2.y + 1 }, type);
+            } else {
+                const fromCenter = { x: from.x + from.w / 2, y: from.y + from.h / 2 };
+                const toCenter = { x: to.x + to.w / 2, y: to.y + to.h / 2 };
+                const startPoint = this.getEdgePoint(fromCenter, toCenter, from);
+                const endPoint = this.getEdgePoint(toCenter, fromCenter, to);
+                
+                const d = `M ${startPoint.x} ${startPoint.y} L ${endPoint.x} ${endPoint.y}`;
+                path = this.createPath(d, type);
+                arrow = this.createArrow(endPoint, startPoint, type);
+            }
+            g.appendChild(path); g.appendChild(arrow); this.svg.appendChild(g);
+        }
+        
+        getEdgePoint(p1, p2, box) {
+            const dx = p2.x - p1.x, dy = p2.y - p1.y, angle = Math.atan2(dy, dx);
+            const w = box.w / 2, h = box.h / 2;
+            const tanPhi = h / w, tanTheta = Math.abs(Math.tan(angle));
+            let x, y;
+            if (tanTheta < tanPhi) {
+                x = p1.x + Math.sign(dx) * w; y = p1.y + Math.sign(dx) * w * Math.tan(angle);
+            } else {
+                y = p1.y + Math.sign(dy) * h; x = p1.x + Math.sign(dy) * h / Math.tan(angle);
+            }
+            return { x, y };
+        }
+
+        createPath(d, type) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', d); path.classList.add('connection-line');
+            if (type === 'loop') path.classList.add('loop');
+            return path;
+        }
+
+        createArrow(p1, p2, type) {
+            const angle = Math.atan2(p1.y - p2.y, p1.x - p2.x), size = 8;
+            const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            const p1x = p1.x, p1y = p1.y;
+            const p2x = p1.x - size * 1.5 * Math.cos(angle - Math.PI / 7);
+            const p2y = p1.y - size * 1.5 * Math.sin(angle - Math.PI / 7);
+            const p3x = p1.x - size * 1.5 * Math.cos(angle + Math.PI / 7);
+            const p3y = p1.y - size * 1.5 * Math.sin(angle + Math.PI / 7);
+            arrow.setAttribute('points', `${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y}`);
+            arrow.classList.add('connection-arrow');
+            if (type === 'loop') arrow.classList.add('loop');
+            return arrow;
+        }
+
+        startWorkflow() {
+            if (this.isRunning) return;
+            this.isRunning = true; this.resetWorkflowVisuals();
+            document.getElementById('start-workflow').disabled = true;
+            document.getElementById('pause-workflow').disabled = false;
+            document.getElementById('view-results-btn').style.display = 'none';
+            this.executeNextStep();
+        }
+
+        pauseWorkflow() {
+            if (!this.isRunning) return;
+            this.isRunning = false;
+            this.showToast('⏸️ Workflow paused.');
+            document.getElementById('start-workflow').textContent = '▶️ Resume';
+            document.getElementById('start-workflow').disabled = false;
+            document.getElementById('pause-workflow').disabled = true;
+        }
+
+        resetWorkflow() {
+            this.isRunning = false; this.currentStep = -1;
+            this.resetWorkflowVisuals();
+            this.showToast('🔄 Workflow reset.');
+            document.getElementById('start-workflow').textContent = '▶️ Run';
+            document.getElementById('start-workflow').disabled = false;
+            document.getElementById('pause-workflow').disabled = true;
+            document.getElementById('view-results-btn').style.display = 'none';
+        }
+        
+        resetWorkflowVisuals() {
+             Object.values(this.nodes).forEach(node => node.el.classList.remove('active', 'completed'));
+        }
+
+        executeNextStep() {
+            if (!this.isRunning) return;
+            if (this.currentStep >= 0) {
+                const prevNodeId = this.workflowExecutionOrder[this.currentStep];
+                if (this.nodes[prevNodeId]) {
+                    this.nodes[prevNodeId].el.classList.remove('active');
+                    this.nodes[prevNodeId].el.classList.add('completed');
+                }
+            }
+            this.currentStep++;
+            if (this.currentStep >= this.workflowExecutionOrder.length) {
+                this.completeWorkflow(); return;
+            }
+            const nodeId = this.workflowExecutionOrder[this.currentStep];
+            const node = this.nodes[nodeId];
+            if (node) {
+                node.el.classList.remove('completed'); node.el.classList.add('active');
+                this.triggerNodeActivationEffect(node.el);
+            }
+            setTimeout(() => this.executeNextStep(), 1500);
+        }
+        
+        completeWorkflow() {
+            this.isRunning = false;
+            this.showToast('🎉 Workflow completed successfully!');
+            const lastNodeId = this.workflowExecutionOrder[this.workflowExecutionOrder.length - 1];
+            if (this.nodes[lastNodeId]) {
+                this.nodes[lastNodeId].el.classList.remove('active');
+                this.nodes[lastNodeId].el.classList.add('completed');
+            }
+            document.getElementById('start-workflow').disabled = false;
+            document.getElementById('pause-workflow').disabled = true;
+            document.getElementById('view-results-btn').style.display = 'inline-flex';
+        }
+
+        triggerNodeActivationEffect(nodeEl) {
+            const container = document.createElement('div');
+            container.className = 'confetti-container';
+            const colors = ['#10b981', '#66fcf1', '#f59e0b', '#8b5cf6', '#ec4899'];
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti-particle';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                const angle = Math.random() * 360, radius = Math.random() * 80 + 50;
+                particle.style.setProperty('--x-end', `${Math.cos(angle * Math.PI / 180) * radius}px`);
+                particle.style.setProperty('--y-end', `${Math.sin(angle * Math.PI / 180) * radius}px`);
+                container.appendChild(particle);
+            }
+            nodeEl.appendChild(container);
+            setTimeout(() => container.remove(), 1200);
+        }
+
+        showToast(message) {
+            const toast = document.getElementById('toast') || document.createElement('div');
+            if (!toast.id) {
+                toast.id = 'toast';
+                toast.className = 'toast-notification';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    }
+
+    new WorkflowDesigner();
+
+    document.querySelectorAll('.page-link').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = btn.getAttribute('href');
+            document.body.classList.add('fade-out');
+            setTimeout(() => { window.location.href = href; }, 600);
+        });
+    });
+});
+</script>
+{% endblock %}

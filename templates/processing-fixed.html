@@ -133,7 +133,7 @@
   /* Progress Bar */
   .progress-bar {
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;
     height: 8px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
@@ -162,11 +162,13 @@
   .step-line {
     position: absolute;
     top: 20px;
-    left: 50px;
-    right: 50px;
+    left: 0;
+    right: 0;
     height: 2px;
     background: rgba(255, 255, 255, 0.2);
     z-index: 1;
+    margin: 0 auto;
+    width: calc(100% - 100px);
   }
 
   .step-line-progress {
@@ -175,7 +177,7 @@
     left: 50px;
     height: 2px;
     background: linear-gradient(90deg, #66fcf1, #4de1d7);
-    width: 0%;
+    width: 0;
     transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     z-index: 2;
     box-shadow: 0 0 10px rgba(102, 252, 241, 0.8);
@@ -504,48 +506,67 @@ document.addEventListener("DOMContentLoaded", function() {
     };
     tempImg.src = src;
   }
+
+  // Helper function to update the progress line
+  function updateStepLineProgress(currentStepIndex) {
+      if (currentStepIndex < 0 || currentStepIndex >= steps.length) return;
+
+      const stepPositions = Array.from(steps).map(s => s.offsetLeft + s.offsetWidth / 2);
+      const lineStartOffset = stepPositions[0];
+      
+      const targetPosition = stepPositions[currentStepIndex];
+      const lineWidth = targetPosition - lineStartOffset;
+
+      stepLineProgress.style.width = `${lineWidth}px`;
+  }
   
   // Processing sequence
-  let step = 0;
+  let currentStep = 0;
   function nextStep() {
-    if (step > 0) {
-      steps[step-1].classList.remove('active');
-      steps[step-1].classList.add('completed');
+    if (currentStep > 0) {
+      steps[currentStep-1].classList.remove('active');
+      steps[currentStep-1].classList.add('completed');
     }
     
-    if (step < steps.length) {
-      steps[step].classList.add('active');
+    if (currentStep < steps.length) {
+      steps[currentStep].classList.add('active');
       
       // Update log
-      if (logContent) {
-        logContent.innerHTML += logs[step] + "<br>";
+      if (logContent && logs[currentStep]) {
+        logContent.innerHTML += logs[currentStep] + "<br>";
         logContent.scrollTop = logContent.scrollHeight;
         
-        // Reinitialize Lucide icons for new content
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
         }
       }
       
       // Update keywords
-      if (keywordsBox && keywords[step]) {
-        keywordsBox.textContent = keywords[step];
+      if (keywordsBox && keywords[currentStep]) {
+        keywordsBox.textContent = keywords[currentStep];
       }
       
       // Show image
-      if (images[step]) {
-        showImage(images[step]);
+      if (images[currentStep]) {
+        showImage(images[currentStep]);
       }
       
       // Update progress
-      const percent = ((step + 1) / steps.length * 100);
+      const percent = (currentStep / (steps.length - 1)) * 100;
       progress.style.width = percent + "%";
-      stepLineProgress.style.width = percent + "%";
+      updateStepLineProgress(currentStep); // This is the corrected part
       
-      step++;
+      currentStep++;
       setTimeout(nextStep, 2500);
     } else {
       // Complete all steps
+      if (logContent && logs[steps.length]) {
+          logContent.innerHTML += logs[steps.length] + "<br>";
+          logContent.scrollTop = logContent.scrollHeight;
+          if (typeof lucide !== 'undefined') {
+              lucide.createIcons();
+          }
+      }
       steps[steps.length - 1].classList.remove('active');
       steps[steps.length - 1].classList.add('completed');
       
@@ -574,7 +595,6 @@ document.addEventListener("DOMContentLoaded", function() {
   // Initialize
   document.body.classList.add("fade-in");
   
-  // Initialize Lucide Icons
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
