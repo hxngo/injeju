@@ -36,6 +36,11 @@ def pipeline():
 def workflow():
     return render_template('workflow-designer.html')
 
+# 워크플로우 디자이너 (processing-fixed.html에서 연결)
+@app.route('/workflow-designer')
+def workflow_designer():
+    return render_template('workflow-designer.html')
+
 @app.route('/simple-workflow')
 def simple_workflow():
     return render_template('workflow-simple.html')
