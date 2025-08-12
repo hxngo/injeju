@@ -110,7 +110,7 @@
         border: 2px solid rgba(102, 252, 241, 0.2);
         backdrop-filter: blur(8px);
         border-radius: 12px; padding: 16px;
-        width: 220px; min-height: 80px;
+        width: 280px; min-height: 120px;
         cursor: move; transition: all 0.3s ease;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         user-select: none;
@@ -135,13 +135,223 @@
     
     .toast-notification { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: rgba(20, 30, 48, 0.9); color: white; padding: 14px 24px; border-radius: 10px; box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2); font-size: 14px; font-weight: 500; z-index: 9999; transition: bottom 0.5s ease-in-out; backdrop-filter: blur(5px); border: 1px solid rgba(102, 252, 241, 0.2); }
     .toast-notification.show { bottom: 30px; }
+
+    /* --- NEW: Plan Token placeholders --- */
+    .plan-token { margin-top: 10px; }
+    .plan-token-label { color: #c1d9f0; font-size: 12px; margin-bottom: 6px; }
+    .plan-token-box {
+        border: 1.5px dashed rgba(102,252,241,0.35);
+        background: rgba(102,252,241,0.05);
+        border-radius: 8px;
+        padding: 16px;
+        min-height: 200px;
+        transition: all 0.3s ease;
+    }
+    .plan-token-box.filled {
+        border: 1.5px solid rgba(102,252,241,0.5);
+        background: rgba(102,252,241,0.08);
+    }
     
+    /* Plan Token Content Styles */
+    .plan-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(102,252,241,0.3);
+    }
+    .plan-title {
+        color: #66fcf1;
+        font-size: 14px;
+        font-weight: 700;
+        text-shadow: 0 0 8px rgba(102,252,241,0.4);
+    }
+    .plan-type {
+        color: #e2e8f0;
+        font-size: 10px;
+        background: rgba(102,252,241,0.15);
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(102,252,241,0.3);
+    }
+    .plan-agents {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 12px 0;
+    }
+    .agent-card {
+        background: rgba(20,30,48,0.6);
+        border: 1px solid rgba(102,252,241,0.25);
+        border-radius: 6px;
+        padding: 8px 10px;
+        transition: all 0.2s ease;
+    }
+    .agent-card:hover {
+        border-color: rgba(102,252,241,0.5);
+        background: rgba(102,252,241,0.1);
+    }
+    .agent-name {
+        color: #e2e8f0;
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        line-height: 1.2;
+    }
+    .agent-control {
+        color: #94a3b8;
+        font-size: 9px;
+        line-height: 1.3;
+    }
+    .plan-summary {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(102,252,241,0.2);
+        text-align: center;
+        background: rgba(102,252,241,0.05);
+        border-radius: 6px;
+        padding: 10px;
+    }
+    .plan-keyframes {
+        color: #66fcf1;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    .plan-timeline {
+        color: #94a3b8;
+        font-size: 10px;
+    }
+
+    /* --- NEW: ControlNet media placeholders --- */
+    .media-grid {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    .media-card {
+        background: rgba(15,23,42,0.6);
+        border: 1px solid rgba(102,252,241,0.18);
+        border-radius: 8px;
+        padding: 8px;
+    }
+    .media-title { color: #e2e8f0; font-size: 11px; margin-bottom: 6px; }
+    .media-placeholder {
+        width: 100%;
+        height: 90px; /* video placeholder size */
+        border: 1.5px dashed rgba(148,163,184,0.45);
+        background: rgba(255,255,255,0.03);
+        border-radius: 6px;
+    }
+    .media-video {
+        width: 100%;
+        height: 90px;
+        border-radius: 6px;
+        object-fit: cover;
+        border: 1px solid rgba(102,252,241,0.3);
+        display: none; /* Initially hidden */
+    }
+    .media-video.show {
+        display: block;
+    }
+
+    /* --- Video Popup Modal (Speech Bubble Style) --- */
+    .video-popup {
+        position: absolute;
+        display: none;
+        z-index: 2000;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        transform: translateY(10px);
+    }
+    .video-popup.show {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .video-popup-content {
+        background: rgba(20, 30, 48, 0.95);
+        border: 2px solid rgba(102, 252, 241, 0.4);
+        border-radius: 16px;
+        padding: 20px;
+        width: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(20px);
+        position: relative;
+    }
+    /* Speech bubble arrow pointing up to ControlNet node */
+    .video-popup-content::before {
+        content: '';
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-bottom: 12px solid rgba(102, 252, 241, 0.4);
+    }
+    .video-popup-content::after {
+        content: '';
+        position: absolute;
+        top: -9px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 10px solid rgba(20, 30, 48, 0.95);
+    }
+    .video-popup-title {
+        color: #66fcf1;
+        font-size: 16px;
+        font-weight: 700;
+        text-align: center;
+        margin: 0;
+    }
+    .video-popup-video {
+        width: 100%;
+        height: 200px;
+        border-radius: 8px;
+        border: 2px solid rgba(102, 252, 241, 0.2);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        object-fit: cover;
+    }
+    .video-popup-progress {
+        width: 100%;
+        height: 3px;
+        background: rgba(102, 252, 241, 0.2);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    .video-popup-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #66fcf1, #10b981);
+        width: 0%;
+        transition: width 0.1s ease;
+        border-radius: 2px;
+    }
+    .video-popup-info {
+        color: #94a3b8;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    /* --- END NEW --- */
     .confetti-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1002; }
     .confetti-particle { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; background: #10b981; border-radius: 50%; opacity: 0; animation: confetti-burst 1.2s ease-out forwards; }
     @keyframes confetti-burst { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(var(--x-end), var(--y-end)) scale(0); opacity: 0; } }
 </style>
 
-<img class="bg-blur-img" src="{{ url_for('static', filename='images/back3.jpg') }}">
+<img class="bg-blur-img" src="{{ url_for('static', filename='images/back3.jpg') }}" alt="Background">
 <div class="bg-overlay"></div>
 
 <div class="navbar">
@@ -172,36 +382,115 @@
     </div>
     <div class="canvas-container" id="canvas-container">
         <svg class="connection-svg" id="connection-svg"></svg>
-        <!-- Initial Nodes -->
-        <div class="workflow-node node-plan" style="top: 250px; left: 50px;" data-node-id="plan1">
-            <div class="node-header"><div class="node-icon">🧠</div><div><div class="node-title">Plan LLM</div><div class="node-subtitle">실행 계획 생성</div></div></div>
-            <div class="node-content">요구사항을 분석하여 초기 실행 계획 토큰을 생성합니다.</div>
+        
+        <!-- Video Popup Modal (inside canvas container) -->
+        <div class="video-popup" id="video-popup">
+            <div class="video-popup-content">
+                <h3 class="video-popup-title" id="popup-title">ControlNet Processing</h3>
+                <video class="video-popup-video" id="popup-video" muted>
+                    <source id="popup-video-source" src="" type="video/mp4">
+                </video>
+                <div class="video-popup-progress">
+                    <div class="video-popup-progress-bar" id="popup-progress-bar"></div>
+                </div>
+                <div class="video-popup-info" id="popup-info">Processing video...</div>
+            </div>
         </div>
-        <div class="workflow-node node-generation" style="top: 250px; left: 320px;" data-node-id="generation">
+        
+        <!-- Initial Nodes -->
+        <div class="workflow-node node-plan" style="top: 200px; left: 30px;" data-node-id="plan1">
+            <div class="node-header"><div class="node-icon">🧠</div><div><div class="node-title">Plan LLM</div><div class="node-subtitle">실행 계획 생성</div></div></div>
+            <div class="node-content">
+                요구사항을 분석하여 초기 실행 계획 토큰을 생성합니다.
+                <!-- NEW: Plan token placeholder -->
+                <div class="plan-token">
+                    <div class="plan-token-label">Plan Tokens</div>
+                    <div class="plan-token-box" id="plan1-token">
+                        <div style="color: #94a3b8; font-size: 12px; text-align: center; padding: 40px 20px; line-height: 1.5;">
+                            📋 계획 생성 대기중...<br>
+                            <span style="font-size: 10px; color: #64748b;">요구사항 분석 후 로봇 모션 계획을 생성합니다</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="workflow-node node-generation" style="top: 200px; left: 350px;" data-node-id="generation">
             <div class="node-header"><div class="node-icon">🎯</div><div><div class="node-title">Generation Agent</div><div class="node-subtitle">멀티모달 허브</div></div></div>
             <div class="node-content">• Cosmos-Predict2<br>• Cosmos-Transfer<br>• Llama-3-8B</div>
         </div>
-        <div class="workflow-node node-predict" style="top: 450px; left: 320px;" data-node-id="predict">
+
+        <!-- NEW: Llama Guard node between Generation and Video Generation -->
+        <div class="workflow-node node-guard" style="top: 360px; left: 350px;" data-node-id="llamaguard">
+            <div class="node-header"><div class="node-icon">🛡️</div><div><div class="node-title">Llama Guard</div><div class="node-subtitle">안전성 필터링</div></div></div>
+            <div class="node-content">프롬프트/출력을 검사하여 유해·금지 항목을 차단합니다.</div>
+        </div>
+
+        <div class="workflow-node node-predict" style="top: 520px; left: 350px;" data-node-id="predict">
             <div class="node-header"><div class="node-icon">🎬</div><div><div class="node-title">Video Generation</div><div class="node-subtitle">Cosmos-Predict2</div></div></div>
             <div class="node-content">비디오 콘텐츠를 생성하고 Generation Agent로 결과를 반환합니다.</div>
         </div>
-        <div class="workflow-node node-plan" style="top: 250px; left: 590px;" data-node-id="plan2">
+
+        <div class="workflow-node node-plan" style="top: 200px; left: 670px;" data-node-id="plan2">
             <div class="node-header"><div class="node-icon">🧠</div><div><div class="node-title">Plan LLM</div><div class="node-subtitle">계획 수정</div></div></div>
-            <div class="node-content">생성 결과를 바탕으로 계획 토큰을 수정합니다.</div>
-        </div>
-        <div class="workflow-node node-controlnet" style="top: 250px; left: 860px;" data-node-id="controlnet">
-            <div class="node-header"><div class="node-icon">🎛️</div><div><div class="node-title">ControlNet</div><div class="node-subtitle">세부 제어</div></div></div>
-            <div class="node-content">생성 프로세스를 세밀하게 제어합니다.</div>
-        </div>
-        <div class="workflow-node node-support" style="top: 250px; left: 1130px;" data-node-id="support">
-            <div class="node-header"><div class="node-icon">🛠️</div><div><div class="node-title">Support Agent</div><div class="node-subtitle">멀티 컴포넌트 시스템</div></div></div>
-            <div class="support-components">
-                <div class="support-item">Google-T5</div><div class="support-item">Llama-Guard</div>
-                <div class="support-item">ControlNet Models</div><div class="support-item">Cosmos-Guardrail</div>
-                <div class="support-item">Cosmos-Reason</div><div class="support-item">SAM2</div>
+            <div class="node-content">
+                생성 결과를 바탕으로 계획 토큰을 수정합니다.
+                <!-- NEW: Plan token placeholder -->
+                <div class="plan-token">
+                    <div class="plan-token-label">Plan Tokens</div>
+                    <div class="plan-token-box" id="plan2-token">
+                        <div style="color: #94a3b8; font-size: 12px; text-align: center; padding: 40px 20px; line-height: 1.5;">
+                            🔄 계획 수정 대기중...<br>
+                            <span style="font-size: 10px; color: #64748b;">생성 결과를 바탕으로 계획을 최적화합니다</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="workflow-node node-result" style="top: 250px; left: 1460px;" data-node-id="result">
+
+        <div class="workflow-node node-controlnet" style="top: 200px; left: 990px;" data-node-id="controlnet">
+            <div class="node-header"><div class="node-icon">🎛️</div><div><div class="node-title">ControlNet</div><div class="node-subtitle">세부 제어</div></div></div>
+            <div class="node-content">
+                생성 프로세스를 세밀하게 제어합니다.
+                <!-- NEW: Seg/Depth/Edge video placeholders -->
+                <div class="media-grid">
+                    <div class="media-card">
+                        <div class="media-title">Seg</div>
+                        <div class="media-placeholder" title="영상 자리(빈칸)" id="seg-placeholder"></div>
+                        <video class="media-video" id="seg-video" muted loop>
+                            <source src="{{ url_for('static', filename='videos/Segmentation.mp4') }}" type="video/mp4">
+                        </video>
+                    </div>
+                    <div class="media-card">
+                        <div class="media-title">Depth</div>
+                        <div class="media-placeholder" title="영상 자리(빈칸)" id="depth-placeholder"></div>
+                        <video class="media-video" id="depth-video" muted loop>
+                            <source src="{{ url_for('static', filename='videos/Depth.mp4') }}" type="video/mp4">
+                        </video>
+                    </div>
+                    <div class="media-card">
+                        <div class="media-title">Edge</div>
+                        <div class="media-placeholder" title="영상 자리(빈칸)" id="edge-placeholder"></div>
+                        <video class="media-video" id="edge-video" muted loop>
+                            <source src="{{ url_for('static', filename='videos/Edge.mp4') }}" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="workflow-node node-support" style="top: 200px; left: 1310px;" data-node-id="support">
+            <div class="node-header"><div class="node-icon">🛠️</div><div><div class="node-title">Support Agent</div><div class="node-subtitle">멀티 컴포넌트 시스템</div></div></div>
+            <div class="support-components">
+                <div class="support-item">Google-T5</div>
+                <div class="support-item">ControlNet Models</div>
+                <div class="support-item">Cosmos-Guardrail</div>
+                <div class="support-item">Cosmos-Reason</div>
+                <div class="support-item">SAM2</div>
+            </div>
+        </div>
+
+        <div class="workflow-node node-result" style="top: 200px; left: 1630px;" data-node-id="result">
             <div class="node-header"><div class="node-icon">✨</div><div><div class="node-title">Final Result</div><div class="node-subtitle">최종 결과물</div></div></div>
             <div class="node-content">모든 처리 결과를 통합하여 최종 결과물을 출력합니다.</div>
         </div>
@@ -221,7 +510,10 @@ document.addEventListener("DOMContentLoaded", function() {
             this.nodes = {};
             this.connections = [
                 { from: 'plan1', to: 'generation', type: 'normal' },
-                { from: 'generation', to: 'predict', type: 'normal' },
+                /* NEW: Generation -> Llama Guard -> Video */
+                { from: 'generation', to: 'llamaguard', type: 'normal' },
+                { from: 'llamaguard', to: 'predict', type: 'normal' },
+                /* loop remains from predict to generation */
                 { from: 'predict', to: 'generation', type: 'loop' },
                 { from: 'generation', to: 'plan2', type: 'normal' },
                 { from: 'plan2', to: 'controlnet', type: 'normal' },
@@ -238,8 +530,52 @@ document.addEventListener("DOMContentLoaded", function() {
             this.dragOffset = { x: 0, y: 0 };
             this.isRunning = false;
             this.currentStep = -1;
-            this.workflowExecutionOrder = ['plan1', 'generation', 'predict', 'generation', 'plan2', 'controlnet', 'support', 'result'];
+            /* NEW: execution order includes llamaguard */
+            this.workflowExecutionOrder = ['plan1', 'generation', 'llamaguard', 'predict', 'generation', 'plan2', 'controlnet', 'support', 'result'];
             this.nodeCounter = 0;
+            this.controlnetProcessing = false;
+            // Video popup properties
+            this.videoQueue = [
+                { 
+                    src: "{{ url_for('static', filename='videos/Segmentation.mp4') }}", 
+                    title: "Segmentation Analysis", 
+                    info: "Analyzing object segmentation..." 
+                },
+                { 
+                    src: "{{ url_for('static', filename='videos/Depth.mp4') }}", 
+                    title: "Depth Mapping", 
+                    info: "Processing depth information..." 
+                },
+                { 
+                    src: "{{ url_for('static', filename='videos/Edge.mp4') }}", 
+                    title: "Edge Detection", 
+                    info: "Detecting edge information..." 
+                }
+            ];
+            this.currentVideoIndex = 0;
+            this.controlnetProcessing = false;
+            
+            // Plan Token Data
+            this.planTokenData = {
+                "plan_title": "Motion Plan 001",
+                "motion_type": "멀티 에이전트 로봇 동작 계획",
+                "timeline_unit": "초",
+                "style_detail": {
+                    "color_theme": "Neon Blue",
+                    "effect_preset": "Metallic Glow",
+                    "custom_notes": "",
+                    "processing_tag": "processing_seg"
+                },
+                "agents": [
+                    { "name": "어퍼암 (Upper Arm)", "control_type": "각도 제어 (shoulder_pitch)", "keyframes": 5 },
+                    { "name": "엘보 (Elbow Joint)", "control_type": "각도 제어 (elbow_pitch)", "keyframes": 5 },
+                    { "name": "손목 (Wrist)", "control_type": "각도 제어 (wrist_pitch)", "keyframes": 5 },
+                    { "name": "그리퍼 (Gripper)", "control_type": "개폐 비율 (0~1)", "keyframes": 5 },
+                    { "name": "베이스 회전 (Base Yaw)", "control_type": "각도 제어 (base_yaw)", "keyframes": 5 },
+                    { "name": "경로 1 (End-Effector Path)", "control_type": "카르테시안 좌표 (m)", "keyframes": 5 }
+                ]
+            };
+            
             this.init();
         }
 
@@ -277,6 +613,20 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('start-workflow').addEventListener('click', this.startWorkflow.bind(this));
             document.getElementById('pause-workflow').addEventListener('click', this.pauseWorkflow.bind(this));
             document.getElementById('reset-workflow').addEventListener('click', this.resetWorkflow.bind(this));
+            
+            // Video popup events
+            document.addEventListener('click', (e) => {
+                const popup = document.getElementById('video-popup');
+                const popupContent = popup.querySelector('.video-popup-content');
+                
+                // If popup is visible and click is outside popup content
+                if (popup.classList.contains('show') && 
+                    !popupContent.contains(e.target)) {
+                    // Skip to next video
+                    this.currentVideoIndex++;
+                    this.showVideoPopup();
+                }
+            });
         }
 
         addNode() {
@@ -495,6 +845,8 @@ document.addEventListener("DOMContentLoaded", function() {
         pauseWorkflow() {
             if (!this.isRunning) return;
             this.isRunning = false;
+            this.controlnetProcessing = false;
+            this.hideVideoPopup(); // Hide popup if paused during video playback
             this.showToast('⏸️ Workflow paused.');
             document.getElementById('start-workflow').textContent = '▶️ Resume';
             document.getElementById('start-workflow').disabled = false;
@@ -503,6 +855,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         resetWorkflow() {
             this.isRunning = false; this.currentStep = -1;
+            this.controlnetProcessing = false;
             this.resetWorkflowVisuals();
             this.showToast('🔄 Workflow reset.');
             document.getElementById('start-workflow').textContent = '▶️ Run';
@@ -511,8 +864,243 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('view-results-btn').style.display = 'none';
         }
         
+        activateControlNetVideos() {
+            // Start video popup sequence
+            this.currentVideoIndex = 0;
+            this.showVideoPopup();
+        }
+
+        showVideoPopup() {
+            if (this.currentVideoIndex >= this.videoQueue.length) {
+                this.hideVideoPopup();
+                this.showToast('🎬 ControlNet processing completed!');
+                return;
+            }
+
+            const video = this.videoQueue[this.currentVideoIndex];
+            console.log(`Playing video ${this.currentVideoIndex}: ${video.title}`);
+            
+            const popup = document.getElementById('video-popup');
+            const popupVideo = document.getElementById('popup-video');
+            const popupSource = document.getElementById('popup-video-source');
+            const popupTitle = document.getElementById('popup-title');
+            const popupInfo = document.getElementById('popup-info');
+            const progressBar = document.getElementById('popup-progress-bar');
+
+            // Position popup relative to ControlNet node
+            this.positionPopupNearControlNet(popup);
+
+            // Set video content
+            popupSource.src = video.src;
+            popupTitle.textContent = video.title;
+            popupInfo.textContent = video.info;
+            popupVideo.load();
+
+            // Show popup
+            popup.classList.add('show');
+
+            // Setup video events
+            popupVideo.onloadeddata = () => {
+                console.log(`Video ${this.currentVideoIndex} loaded, starting playback`);
+                popupVideo.play();
+            };
+
+            popupVideo.ontimeupdate = () => {
+                if (popupVideo.duration > 0) {
+                    const progress = (popupVideo.currentTime / popupVideo.duration) * 100;
+                    progressBar.style.width = progress + '%';
+                }
+            };
+
+            popupVideo.onended = () => {
+                console.log(`Video ${this.currentVideoIndex} ended, updating preview`);
+                // Update small preview in ControlNet node
+                this.updateControlNetPreview(this.currentVideoIndex);
+                
+                // Move to next video
+                this.currentVideoIndex++;
+                setTimeout(() => {
+                    this.showVideoPopup();
+                }, 800); // Slightly longer delay to see the preview update
+            };
+
+            popupVideo.onerror = () => {
+                console.error('Video failed to load:', video.src);
+                this.currentVideoIndex++;
+                this.showVideoPopup();
+            };
+        }
+
+        positionPopupNearControlNet(popup) {
+            const controlnetNode = this.nodes['controlnet'];
+            if (!controlnetNode) return;
+
+            const nodeRect = controlnetNode.el.getBoundingClientRect();
+            const canvasRect = this.canvas.getBoundingClientRect();
+            
+            // Calculate position relative to canvas container (considering zoom and pan)
+            const nodeX = controlnetNode.x;
+            const nodeY = controlnetNode.y;
+            const nodeWidth = controlnetNode.width;
+            const nodeHeight = controlnetNode.height;
+            
+            // Position popup below the ControlNet node with some margin
+            const popupX = nodeX + (nodeWidth / 2) - 200; // Center horizontally (popup width 400px / 2)
+            const popupY = nodeY + nodeHeight + 20; // Position below with 20px margin
+            
+            popup.style.left = `${popupX}px`;
+            popup.style.top = `${popupY}px`;
+        }
+
+        updateControlNetPreview(videoIndex) {
+            console.log(`Updating preview for video index: ${videoIndex}`);
+            
+            if (videoIndex === 0) {
+                // Segmentation video finished
+                console.log('Activating Segmentation preview');
+                const segPlaceholder = document.getElementById('seg-placeholder');
+                const segVideo = document.getElementById('seg-video');
+                if (segPlaceholder && segVideo) {
+                    segPlaceholder.style.display = 'none';
+                    segVideo.classList.add('show');
+                    segVideo.play();
+                }
+            } else if (videoIndex === 1) {
+                // Depth video finished
+                console.log('Activating Depth preview');
+                const depthPlaceholder = document.getElementById('depth-placeholder');
+                const depthVideo = document.getElementById('depth-video');
+                if (depthPlaceholder && depthVideo) {
+                    depthPlaceholder.style.display = 'none';
+                    depthVideo.classList.add('show');
+                    depthVideo.play();
+                }
+            } else if (videoIndex === 2) {
+                // Edge video finished
+                console.log('Activating Edge preview');
+                const edgePlaceholder = document.getElementById('edge-placeholder');
+                const edgeVideo = document.getElementById('edge-video');
+                if (edgePlaceholder && edgeVideo) {
+                    edgePlaceholder.style.display = 'none';
+                    edgeVideo.classList.add('show');
+                    edgeVideo.play();
+                }
+            }
+        }
+
+        hideVideoPopup() {
+            const popup = document.getElementById('video-popup');
+            const popupVideo = document.getElementById('popup-video');
+            
+            popup.classList.remove('show');
+            popupVideo.pause();
+            popupVideo.currentTime = 0;
+            
+            // Reset progress bar
+            document.getElementById('popup-progress-bar').style.width = '0%';
+            
+            // If ControlNet processing was in progress, continue workflow
+            if (this.controlnetProcessing) {
+                this.controlnetProcessing = false;
+                setTimeout(() => this.executeNextStep(), 1000);
+            }
+        }
+
+        renderPlanToken(nodeId) {
+            const tokenBox = document.getElementById(`${nodeId}-token`);
+            if (!tokenBox) return;
+            
+            // Generate plan token HTML
+            const planHtml = `
+                <div class="plan-header">
+                    <div class="plan-title">${this.planTokenData.plan_title}</div>
+                    <div class="plan-type">${this.planTokenData.motion_type}</div>
+                </div>
+                <div class="plan-agents">
+                    ${this.planTokenData.agents.slice(0, 6).map(agent => `
+                        <div class="agent-card">
+                            <div class="agent-name">${agent.name}</div>
+                            <div class="agent-control">${agent.control_type}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="plan-summary">
+                    <div class="plan-keyframes">${this.planTokenData.agents.length}개 에이전트</div>
+                    <div class="plan-timeline">총 ${this.planTokenData.agents[0].keyframes}개 키프레임 (${this.planTokenData.timeline_unit})</div>
+                </div>
+            `;
+            
+            tokenBox.innerHTML = planHtml;
+            tokenBox.classList.add('filled');
+            
+            // Show animation effect
+            this.showToast(`📋 ${nodeId === 'plan1' ? 'Initial' : 'Updated'} plan token generated!`);
+        }
+
         resetWorkflowVisuals() {
              Object.values(this.nodes).forEach(node => node.el.classList.remove('active', 'completed'));
+             // Reset ControlNet videos and popup
+             this.resetControlNetVideos();
+             this.hideVideoPopup();
+             this.currentVideoIndex = 0;
+             this.controlnetProcessing = false;
+             // Reset Plan Tokens
+             this.resetPlanTokens();
+        }
+
+        resetPlanTokens() {
+            const plan1Token = document.getElementById('plan1-token');
+            const plan2Token = document.getElementById('plan2-token');
+            
+            if (plan1Token) {
+                plan1Token.innerHTML = `
+                    <div style="color: #94a3b8; font-size: 12px; text-align: center; padding: 40px 20px; line-height: 1.5;">
+                        📋 계획 생성 대기중...<br>
+                        <span style="font-size: 10px; color: #64748b;">요구사항 분석 후 로봇 모션 계획을 생성합니다</span>
+                    </div>
+                `;
+                plan1Token.classList.remove('filled');
+            }
+            
+            if (plan2Token) {
+                plan2Token.innerHTML = `
+                    <div style="color: #94a3b8; font-size: 12px; text-align: center; padding: 40px 20px; line-height: 1.5;">
+                        🔄 계획 수정 대기중...<br>
+                        <span style="font-size: 10px; color: #64748b;">생성 결과를 바탕으로 계획을 최적화합니다</span>
+                    </div>
+                `;
+                plan2Token.classList.remove('filled');
+            }
+        }
+
+        resetControlNetVideos() {
+            const segPlaceholder = document.getElementById('seg-placeholder');
+            const segVideo = document.getElementById('seg-video');
+            const depthPlaceholder = document.getElementById('depth-placeholder');
+            const depthVideo = document.getElementById('depth-video');
+            const edgePlaceholder = document.getElementById('edge-placeholder');
+            const edgeVideo = document.getElementById('edge-video');
+            
+            if (segPlaceholder && segVideo) {
+                segPlaceholder.style.display = 'block';
+                segVideo.classList.remove('show');
+                segVideo.pause();
+                segVideo.currentTime = 0;
+            }
+            
+            if (depthPlaceholder && depthVideo) {
+                depthPlaceholder.style.display = 'block';
+                depthVideo.classList.remove('show');
+                depthVideo.pause();
+                depthVideo.currentTime = 0;
+            }
+            
+            if (edgePlaceholder && edgeVideo) {
+                edgePlaceholder.style.display = 'block';
+                edgeVideo.classList.remove('show');
+                edgeVideo.pause();
+                edgeVideo.currentTime = 0;
+            }
         }
 
         executeNextStep() {
@@ -533,6 +1121,19 @@ document.addEventListener("DOMContentLoaded", function() {
             if (node) {
                 node.el.classList.remove('completed'); node.el.classList.add('active');
                 this.triggerNodeActivationEffect(node.el);
+                
+                // Special handling for ControlNet node to show videos
+                if (nodeId === 'controlnet') {
+                    this.controlnetProcessing = true;
+                    this.activateControlNetVideos();
+                    // Don't proceed to next step automatically - wait for video completion
+                    return;
+                }
+                
+                // Special handling for Plan LLM nodes to show plan tokens
+                if (nodeId === 'plan1' || nodeId === 'plan2') {
+                    setTimeout(() => this.renderPlanToken(nodeId), 800);
+                }
             }
             setTimeout(() => this.executeNextStep(), 1500);
         }
