@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Output Dashboard - CORSS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --preview-h: 560px;  /* 프리뷰 & 벤치마크 카드 동일 높이 */
+      --ai-h: 420px;       /* AI 요약 섹션 높이 */
+      --ai-card-h: 200px;  /* 에이전트 카드 높이 */
+      --qa-h: 220px;       /* QA 카드 높이 */
+      --agent-h: 320px;    /* 에이전트 사용 비율 카드 높이 */
+    }
+
+    html, body { min-height:100vh; font-family:'Inter',sans-serif; background:#10192b; color:#f1faff; letter-spacing:.01em; overflow-x:hidden; }
+    body { opacity:0; transition:opacity .5s cubic-bezier(.5,.04,.27,1); }
+    body.fade-in{opacity:1} body.fade-out{opacity:0; pointer-events:none}
+
+    .bg-blur-img{position:fixed; inset:0; width:100vw; height:100vh; object-fit:cover; filter:brightness(.38) blur(2.2px) grayscale(11%); z-index:0; pointer-events:none; opacity:.97}
+    .bg-overlay{position:fixed; inset:0; background:radial-gradient(ellipse at 55% 33%,rgba(36,197,246,.12) 0,rgba(11,24,40,.99) 60%); z-index:1; pointer-events:none}
+    .bg-pattern{position:fixed; inset:0; background-image:repeating-linear-gradient(120deg,rgba(80,255,255,.018) 0 1px,transparent 1px 60px); opacity:.22; z-index:2; pointer-events:none}
+
+    .navbar{position:fixed; top:0; left:0; width:100%; height:74px; background:linear-gradient(140deg,rgba(22,30,48,.98) 70%,rgba(15,23,42,.98) 100%); backdrop-filter:blur(24px) saturate(180%); border-bottom:1px solid rgba(102,252,241,.14); display:flex; justify-content:space-between; align-items:center; padding:0 38px; z-index:1010; box-shadow:0 12px 36px rgba(0,0,0,.11), 0 1px 0 rgba(102,252,241,.06) inset}
+    .navbar img{height:54px; cursor:pointer}
+    .navbar-links{display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.04); padding:8px 16px; border-radius:38px; border:1px solid rgba(102,252,241,.09); box-shadow:0 4px 18px rgba(0,0,0,.08)}
+    .navbar-links a{font-weight:700; font-size:1.09rem; color:#aee9f6; text-decoration:none; padding:10px 22px; border-radius:25px; transition:all .4s cubic-bezier(.5,.04,.27,1)}
+    .navbar-links a:hover{color:#68fff2; background:rgba(76,224,255,.10)}
+
+    .dashboard-root{position:relative; z-index:10; max-width:1440px; margin:105px auto 70px; padding:0 1vw 60px; display:flex; flex-direction:column; gap:34px}
+    .dashboard-title-bar{display:flex; align-items:center; gap:14px; font-size:2.3rem; font-weight:900; color:#87f0ff; margin-bottom:6px; letter-spacing:2px; background:linear-gradient(90deg,#51e6fc3a 0 70%,transparent 100%); border-radius:14px; box-shadow:0 6px 32px #38d6e45c; padding:16px 30px 16px 18px; border-left:6px solid #25fff7; border-bottom:2px solid #22e3db30; margin-left:-15px}
+
+    /* ======= 메인 그리드 ======= */
+    .dashboard-flex{
+      display:grid;
+      grid-template-columns: 1.1fr 1.3fr 1fr;
+      grid-template-areas:
+        "left   center right"
+        "ai     ai     right"
+        "qa     qa     right";
+      gap:32px; align-items:start; width:100%;
+    }
+    .area-left  { grid-area:left; }
+    .area-center{ grid-area:center; }
+    .area-right { grid-area:right; }
+    .area-ai    { grid-area:ai; }
+    .area-qa    { grid-area:qa; }
+
+    /* ======= LEFT ======= */
+    .video-grid-card{background:rgba(25,37,64,.98); border-radius:19px; border:2px solid rgba(80,255,255,.11); box-shadow:0 10px 40px rgba(20,40,90,.11); padding:27px 28px 17px; display:flex; flex-direction:column; align-items:center; height:var(--preview-h); position:relative; overflow:hidden}
+    .video-grid-title{font-size:1.17rem; font-weight:900; color:#67e6ff; margin-bottom:13px; letter-spacing:.02em; width:100%; display:flex; align-items:center; gap:8px}
+    .video-grid-area{flex:1; width:100%; max-width:520px; margin:0 auto 8px; background:linear-gradient(115deg,#202935 60%,#242b31 100%); border-radius:13px; border:1.5px solid #48e4f94c; box-shadow:0 2px 18px #28fcff19; display:flex; align-items:center; justify-content:center; transition:box-shadow .3s; overflow:hidden; cursor:pointer}
+    .video-grid-area:hover{box-shadow:0 0 0 2px #2ef3ff66 inset,0 0 0 6px #2ef3ff14 inset}
+    .video-grid-note{color:#aef9ff; font-size:.98rem; margin-top:8px; opacity:.82; width:100%; padding-left:6px}
+
+    /* ======= CENTER: 벤치마크/운영 ======= */
+    .benchmark-section{background:linear-gradient(120deg,rgba(30,42,71,.98) 0 80%,#242e45 100%); border-radius:13px; box-shadow:0 6px 32px rgba(15,24,50,.12); border:1.5px solid rgba(80,255,255,.07); padding:14px 18px; height:var(--preview-h); display:flex; flex-direction:column}
+    .benchmark-title{font-size:1.09rem; font-weight:900; color:#42fff0; margin:2px 0 8px; letter-spacing:.03em; display:flex; align-items:center; gap:8px; border-left:3px solid #1dfcffbb; padding-left:7px}
+    .bench-grid{display:grid; grid-template-columns:1fr; gap:10px; flex:1}
+    .bench-card{background:linear-gradient(110deg,#223250cc 0 80%,#202b40 100%); border:1px solid rgba(80,255,255,.08); border-radius:10px; padding:10px 12px; display:grid; grid-template-rows:auto 1fr auto; overflow:hidden}
+    .bench-card h6{margin:0 0 6px; font-weight:800; color:#9afcf3; font-size:1rem}
+
+    /* 차트가 정사각형으로 중앙에 놓이도록 */
+    .radar-stage{
+      width:100%;
+      height:100%;
+      min-height:230px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .radar-stage canvas{display:block;}
+
+    .bench-note{color:#8feee7; opacity:.85; font-size:.9rem; line-height:1.35; overflow-wrap:anywhere; margin-top:8px}
+
+    /* ======= RIGHT ======= */
+    .dashboard-main-right{display:flex; flex-direction:column; gap:23px; min-width:280px}
+    .meta-card-board{display:flex; gap:13px; justify-content:space-between; flex-wrap:wrap; align-items:stretch}
+    .meta-card{flex:1 1 110px; background:linear-gradient(110deg,#263859e6 0 80%,#1c2538 100%); border-radius:13px; box-shadow:0 2px 20px #28c9fc12; border:1.5px solid rgba(102,252,241,.08); padding:19px 19px 15px; min-width:100px; min-height:95px; position:relative; display:flex; flex-direction:column; align-items:flex-start; overflow:hidden; transition:box-shadow .16s}
+    .meta-card:hover{box-shadow:0 8px 38px #42ffe512}
+    .meta-label{font-weight:700; color:#a1e9ff; margin-bottom:2px; font-size:1.01rem}
+    .meta-value{font-size:1.53rem; font-weight:900; color:#fff; text-shadow:0 2px 24px #11e8fa24}
+    .meta-desc{font-size:1.01rem; margin-top:6px; color:#83e7f6; opacity:.75}
+    .meta-card .meta-icon{position:absolute; right:13px; bottom:11px; font-size:2.1rem; color:#19fff7; opacity:.11}
+
+    .section-title{font-size:1.11rem; font-weight:900; color:#60ffe6; margin-bottom:8px; letter-spacing:.01em; display:flex; align-items:center; gap:8px; border-left:3px solid #18ffe9bb; padding-left:8px}
+    .viz-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; background:linear-gradient(110deg,#142637cc 0 80%,#293649 100%); border-radius:12px; padding:19px; box-shadow:0 5px 26px #11e8f515; border:1.3px solid #3cfff421}
+    .viz-box{background:linear-gradient(108deg,#232f4bcc 0 80%,#173c49 100%); border-radius:8px; box-shadow:0 2px 12px #36eaff19; border:1.1px solid #3cf7ee2d; padding:12px; display:flex; flex-direction:column; align-items:center; min-height:190px}
+    .viz-label{font-size:.99em; font-weight:700; color:#e7ffff; margin-bottom:7px}
+    .viz-canvas{width:100%!important; height:150px!important}
+    .viz-stat{color:#e7ffea; font-size:.93em; margin-top:6px}
+
+    .agent-card{background:linear-gradient(110deg,#1a2a3fe0 0 80%,#20344b 100%); border-radius:12px; border:1.3px solid #35ffe12a; box-shadow:0 4px 20px #2cf0ff10; padding:16px 18px; height:var(--agent-h); display:flex; flex-direction:column; justify-content:center}
+    .agent-title{font-size:1.03rem; font-weight:900; color:#9afcf3; margin-bottom:8px}
+    .agent-canvas{width:100%!important; height:calc(var(--agent-h) - 60px)!important}
+
+    /* ======= AI 분석 요약 / QA ======= */
+    .ai-report-wide{background:linear-gradient(110deg,#1b2337f2 0 70%,#263a4d 100%); border-radius:13px; border:1.5px solid rgba(80,255,255,.10); box-shadow:0 6px 18px #42e5ff15; padding:21px 22px 14px; color:#d4f8fa; min-height:var(--ai-h)}
+    .ai-report-title{font-size:1.09rem; font-weight:900; color:#46fff8; margin-bottom:10px; display:flex; align-items:center; gap:8px; border-left:3px solid #23ffd7bb; padding-left:8px}
+    .ai-flow-row{display:flex; gap:11px; margin-bottom:9px; flex-wrap:wrap}
+    .ai-agent{
+      background:linear-gradient(111deg,#232a3d 60%,#2d4b52 100%);
+      border-radius:9px; padding:14px 14px 10px; min-width:220px; flex:1 1 260px;
+      box-shadow:0 3px 13px #22eff719; border:1.1px solid #23f8d220;
+      min-height:var(--ai-card-h); display:flex; flex-direction:column; justify-content:flex-start;
+    }
+    .ai-agent-label{font-weight:900; color:#93ffef; font-size:1.12em; margin-bottom:6px}
+    .ai-agent-role,.ai-agent-plan,.ai-agent-result{font-size:1.02em; color:#e0fcff; margin-bottom:3px}
+    .ai-agent-result{color:#d2ffe7}
+    .ai-report-summary{margin-top:10px; color:#70ffe3; font-size:1.02em; font-weight:600; line-height:1.45; background:rgba(36,255,235,.11); border-radius:8px; padding:8px 14px 8px 12px}
+
+    .qa-card-wide{background:linear-gradient(90deg,#172434e3 0 80%,#1e2e43 100%); border-radius:10px; border:1px solid rgba(70,255,185,.07); box-shadow:0 2px 10px rgba(16,170,180,.08); padding:16px 18px 14px; min-height:var(--qa-h)}
+    .log-title{font-size:1.08rem; font-weight:900; color:#65f6ff; margin-bottom:8px; border-left:2.2px solid #1dfcff; padding-left:6px}
+    ul.custom-log-list{padding-left:1.1em} ul.custom-log-list li{margin-bottom:2.5px; font-size:1.01rem; color:#e2f6e3}
+    .btn-qa{background:linear-gradient(90deg,#30ffdf 70%,#20c2f6 100%); color:#002d25; font-weight:700; font-size:.99em; border:none; border-radius:7px; margin-top:8px; padding:5px 18px; box-shadow:0 2px 15px #1ef5ffe8; letter-spacing:.01em; min-width:145px}
+    .btn-qa:hover{background:linear-gradient(92deg,#20e0ff 30%,#0de9a2 100%); color:#112233; box-shadow:0 7px 28px #39e8ffc2}
+
+    /* ======= 반응형 ======= */
+    @media (max-width:1200px){
+      .dashboard-flex{
+        grid-template-columns:1fr;
+        grid-template-areas:
+          "left"
+          "center"
+          "ai"
+          "qa"
+          "right";
+      }
+      .video-grid-card, .benchmark-section, .ai-report-wide, .qa-card-wide, .agent-card{height:auto; min-height:auto}
+      .agent-canvas{height:220px!important}
+    }
+    @media (max-width:900px){
+      .dashboard-title-bar{font-size:1.35rem}
+      .video-grid-area{height:300px}
+      .viz-grid{grid-template-columns:1fr;} /* 좁을 때 1열로 접힘 */
+    }
+  </style>
+</head>
+<body>
+  <img class="bg-blur-img" src="{{ url_for('static', filename='images/back3.jpg') }}" alt="Background" />
+  <div class="bg-overlay"></div>
+  <div class="bg-pattern"></div>
+
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="{{ url_for('static', filename='images/CORSS_logo_checked.png') }}" alt="CORSS Logo" onclick="window.location.href='/'" />
+    </div>
+    <div class="navbar-links">
+      <a href="/" class="page-link">Home</a>
+      <a href="/upload" class="page-link">Upload</a>
+      <a href="/about" class="page-link">About</a>
+      <a href="/contact" class="page-link">Contact</a>
+    </div>
+  </nav>
+
+  <main class="dashboard-root">
+    <div class="dashboard-title-bar"><span class="dot">●</span> DATA AUGMENTATION OUTPUT DASHBOARD</div>
+
+    <div class="dashboard-flex">
+      <!-- LEFT -->
+      <section class="area-left">
+        <div class="video-grid-card">
+          <div class="video-grid-title">🎬 증강 결과 View <span style="font-size:.95em;font-weight:500;">  (2x2, 4x4, 8x8 <br>- Click for Detail)</span></div>
+          <div id="gridPreview" class="video-grid-area" role="button" aria-label="Open preview grid">
+            <span style="color:#b0e3ff; text-align:center;">[ 클릭 시 각 묶음별 상세/품질 분석 제공 ]</span>
+          </div>
+          <div class="video-grid-note">
+            ※ 동일배경 내 2x2 / 4x4 / 8x8 묶음별 증강영상<br />
+            클릭시 세부 품질·조건별 분석 제공
+          </div>
+        </div>
+      </section>
+
+      <!-- CENTER -->
+      <section class="area-center">
+        <div class="benchmark-section">
+          <div class="benchmark-title">벤치마크/운영 리포트</div>
+          <div class="bench-grid">
+            <div class="bench-card">
+              <h6>모델별 역량(정규화) – 외부 공개 지표 참고</h6>
+              <div class="radar-stage">
+                <canvas id="capRadar"></canvas>
+              </div>
+              <div class="bench-note">※ SAM2(mIoU), Depth-Anything(AbsRel 역변환), LLaMA‑3(MMLU), Llama‑Guard(안전 필터 통과율), DeepSeek-coder(Plan 성공률)을 0~100으로 정규화한 참고 시각화입니다.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT -->
+      <aside class="dashboard-main-right area-right">
+        <div class="meta-card-board">
+          <div class="meta-card">
+            <div class="meta-label">Prompt 반영률</div>
+            <div class="meta-value">94.1%</div>
+            <div class="meta-desc">지시문-결과 정합도 (자동검증)</div>
+            <span class="meta-icon">🎯</span>
+          </div>
+          <div class="meta-card">
+            <div class="meta-label">다양성 점수</div>
+            <div class="meta-value">8.5 / 10</div>
+            <div class="meta-desc">구성·시각적 다양성 (클러스터링 기반)</div>
+            <span class="meta-icon">🌀</span>
+          </div>
+          <div class="meta-card">
+            <div class="meta-label">평균 생성 시간</div>
+            <div class="meta-value">1.7s</div>
+            <div class="meta-desc">샘플 1개 평균(실측)</div>
+            <span class="meta-icon">⏱️</span>
+          </div>
+        </div>
+
+        <!-- 1행2열: 데이터 품질/분포 -->
+        <div class="section-title">📊 데이터 품질/분포 시각화</div>
+        <div class="viz-grid">
+          <div class="viz-box">
+            <div class="viz-label">조건별 증강 비율</div>
+            <canvas class="viz-canvas" id="condPieChart"></canvas>
+            <div class="viz-stat">조명 28%, 각도 34%, 배경 38%</div>
+          </div>
+          <div class="viz-box">
+            <div class="viz-label">샘플 품질·불량률 분포</div>
+            <canvas class="viz-canvas" id="distChart"></canvas>
+            <div class="viz-stat">불량 0.8% / 합격 99.2%</div>
+          </div>
+        </div>
+
+        <!-- 아래 행: 에이전트 사용 비율 -->
+        <div class="agent-card">
+          <div class="agent-title">에이전트 사용 비율</div>
+          <canvas class="agent-canvas" id="agentDonut"></canvas>
+        </div>
+      </aside>
+
+      <!-- AI 분석 요약 -->
+      <section class="ai-report-wide area-ai">
+        <div class="ai-report-title">🧠 AI 분석 요약 리포트 (Agents & Plan)</div>
+        <div class="ai-flow-row">
+          <div class="ai-agent">
+            <div class="ai-agent-label">🤖 Cosmos‑Predict2</div>
+            <div class="ai-agent-role">입력 프롬프트/조건 해석</div>
+            <div class="ai-agent-plan">시뮬 환경 Plan: <b>Pick&Place</b> 기반 구성</div>
+            <div class="ai-agent-result">실행결과: 환경 seed, 초기조건 매핑</div>
+          </div>
+          <div class="ai-agent">
+            <div class="ai-agent-label">🔄 Cosmos‑Transfer1</div>
+            <div class="ai-agent-role">도메인 랜덤/컨트롤넷 변환</div>
+            <div class="ai-agent-plan">랜덤 배경·조명·포즈 다변화</div>
+            <div class="ai-agent-result">실행결과: 증강된 샘플 16장 생성</div>
+          </div>
+          <div class="ai-agent">
+            <div class="ai-agent-label">🦙 Llama3</div>
+            <div class="ai-agent-role">프롬프트 조건 이중 검증</div>
+            <div class="ai-agent-plan">조건 위반/누락 체크</div>
+            <div class="ai-agent-result">실행결과: QA 리포트 / Fail 1건 탐지</div>
+          </div>
+        </div>
+        <div class="ai-report-summary">
+          전체 증강 프로세스 자동화. 각 에이전트별 로그·결과·분석 상세 확인 가능.
+        </div>
+      </section>
+
+      <!-- QA -->
+      <section class="qa-card-wide area-qa">
+        <div class="log-title">생성 이력 및 품질 인증 추적 (QA)</div>
+        <ul class="custom-log-list">
+          <li>Agent: Cosmos‑Transfer1</li>
+          <li>Prompt: "Pick up red cube and stack on shelf"</li>
+          <li>조건: viewpoint=right, lighting=low</li>
+          <li>생성시간: 1.32s</li>
+          <li>샘플 품질 변화: <b>+2.4%</b> (이전세션 대비)</li>
+          <li>검증결과: <b>Pass</b> (Cosmos QA 기준 통과)</li>
+        </ul>
+        <button class="btn-qa">QA 공식 검증서 보기</button>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // 페이드 전환 & 프리뷰
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.classList.add("fade-in");
+      document.querySelectorAll(".page-link").forEach(link => {
+        link.addEventListener("click", e => {
+          e.preventDefault();
+          const href = link.getAttribute("href");
+          document.body.classList.remove("fade-in");
+          document.body.classList.add("fade-out");
+          setTimeout(() => (window.location.href = href), 400);
+        });
+      });
+      const preview = document.getElementById("gridPreview");
+      preview.addEventListener("click", () => {
+        const base = "{{ url_for('grid_view') }}";
+        const url  = `${base}?location=rooftop&layout=2x2`;
+        window.open(url, "gridPopup", "width=1280,height=820,noopener,noreferrer");
+      });
+    });
+
+    // 레이더 캔버스를 컨테이너(.radar-stage)에 맞춰 정사각으로 세팅
+    function fitRadar() {
+      const stage  = document.querySelector('.radar-stage');
+      const canvas = document.getElementById('capRadar');
+      if (!stage || !canvas) return;
+      const size = Math.min(stage.clientWidth, stage.clientHeight);
+      canvas.style.width  = size + 'px';
+      canvas.style.height = size + 'px';
+    }
+
+    /* ===== 벤치마크 레이더 ===== */
+    const capRadarCtx = document.getElementById('capRadar').getContext('2d');
+    const capRadarChart = new Chart(capRadarCtx, {
+      type:'radar',
+      data:{
+        labels:['Segmentation(SAM2)','Depth(Depth-Anything)','Language(LLaMA‑3)','Safety(Llama‑Guard)','Planning(DeepSeek)'],
+        datasets:[{ label:'정규화 점수(0~100)', data:[88,86,68,92,74], backgroundColor:'rgba(52,255,214,.15)', borderColor:'#34ffd6', pointBackgroundColor:'#fff', borderWidth:2 }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false, // 우리가 주는 정사각 크기를 그대로 사용
+        plugins:{ legend:{ labels:{ color:'#ccfff6' } } },
+        scales:{ r:{ angleLines:{ color:'#2a4864' }, grid:{ color:'#2a4864' }, pointLabels:{ color:'#aef7f5', font:{ size:11 } }, suggestedMin:0, suggestedMax:100, ticks:{ display:false } } }
+      }
+    });
+
+    // 최초/리사이즈 때마다 캔버스 정사각 맞추기
+    window.addEventListener('load', fitRadar);
+    window.addEventListener('resize', () => { fitRadar(); capRadarChart.resize(); });
+
+    /* ===== 오른쪽 그래프 ===== */
+    new Chart(document.getElementById('condPieChart'), {
+      type:'pie',
+      data:{ labels:['조명','각도','배경'], datasets:[{ data:[28,34,38], backgroundColor:['#58f8ee','#19b8e7','#b4f7f8'] }] },
+      options:{ plugins:{ legend:{ labels:{ color:'#fff', font:{size:13} } } } }
+    });
+
+    new Chart(document.getElementById('distChart'), {
+      type:'bar',
+      data:{ labels:['합격','불량'], datasets:[{ data:[99.2,0.8], backgroundColor:['#46f3c2','#fb6a5b'], borderRadius:6 }] },
+      options:{ plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#d0fffa', font:{size:12}}, grid:{ display:false } }, y:{ ticks:{ color:'#c8ffe7', font:{size:11}}, beginAtZero:true, grid:{ color:'#2158772e' } } } }
+    });
+
+    /* ===== 에이전트 사용 비율 ===== */
+    new Chart(document.getElementById('agentDonut'), {
+      type:'doughnut',
+      data:{ labels:['Predict2','Transfer1','Llama3'], datasets:[{ data:[42,38,20], backgroundColor:['#3cf7e1','#18c8ff','#88ffde'], borderWidth:0 }] },
+      options:{ plugins:{ legend:{ position:'bottom', labels:{ color:'#e5fff9' } }, tooltip:{ callbacks:{ label:ctx=>`${ctx.label}: ${ctx.parsed}%` } } }, cutout:'60%' }
+    });
+  </script>
+</body>
+</html>

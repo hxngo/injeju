@@ -50,6 +50,16 @@ def simple_workflow():
 def detail():
     return render_template('detail.html')
 
+# 출력 페이지 (workflow-designer.html에서 연결)
+@app.route('/output')
+def output():
+    return render_template('output.html')
+
+# 그리드 뷰 페이지 (output.html에서 연결)
+@app.route('/grid-view')
+def grid_view():
+    return render_template('grid_view.html')
+
 # 커서 테스트 페이지
 @app.route('/cursor-test')
 def cursor_test():

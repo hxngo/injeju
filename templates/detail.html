@@ -1,647 +1,217 @@
-  {% extends "base.html" %}
-  {% block title %}Upload - CORSS{% endblock %}
-  {% block body %}
-  <style>
-  html, body {
-    background: #111f2e;
-    min-height: 100vh;
-    min-width: 100vw;
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
-    overflow: hidden;
-  }
-  body {
-    opacity: 1; transition: opacity 0.6s cubic-bezier(.5,.04,.27,1);
-  }
-  body.fade-out { opacity: 0; pointer-events:none; }
-  body.fade-in  { opacity: 1; }
-  .bg-blur-img {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    z-index: 0;
-    object-fit: cover;
-    filter: brightness(0.53) blur(2px) grayscale(8%);
-    pointer-events: none;
-  }
-  .bg-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: linear-gradient(120deg, rgba(20,40,70,0.82) 60%, rgba(10,36,70,0.91) 100%);
-    z-index: 1;
-    pointer-events: none;
-  }
-  .navbar {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 80px;
-    background: linear-gradient(135deg, rgba(20, 30, 48, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
-    backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 1px solid rgba(102, 252, 241, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 40px;
-    box-sizing: border-box;
-    z-index: 1002;
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.12),
-      0 1px 0 rgba(255, 255, 255, 0.05) inset;
-  }
-  
-  .navbar-brand {
-    display: flex;
-    align-items: center;
-    border: none !important;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .navbar-brand img {
-    height: 65px;
-    width: auto;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-  }
-  
-  .navbar-brand img:hover {
-    transform: scale(1.05);
-  }
-  
-  .navbar-links {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 8px 12px;
-    border-radius: 50px;
-    border: 1px solid rgba(102, 252, 241, 0.1);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  .navbar-links a {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #c1d9f0;
-    text-decoration: none;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    padding: 12px 20px;
-    border-radius: 25px; 
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    position: relative;
-    overflow: hidden;
-    background: transparent;
-    border: 1px solid transparent;
-    box-shadow: none;
-  }
-  
-  .navbar-links a::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(135deg, rgba(102, 252, 241, 0.1) 0%, rgba(77, 225, 215, 0.15) 100%);
-    transition: left 0.5s ease;
-    border-radius: 25px;
-  }
-  
-  .navbar-links a:hover::before {
-    left: 0;
-  }
-  
-  .navbar-links a:hover {
-    color: #66fcf1;
-    background: linear-gradient(135deg, rgba(102, 252, 241, 0.15) 0%, rgba(77, 225, 215, 0.1) 100%);
-    border-color: rgba(102, 252, 241, 0.3);
-    text-shadow: 0 0 15px rgba(102, 252, 241, 0.6);
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 25px rgba(102, 252, 241, 0.2),
-      0 0 0 1px rgba(102, 252, 241, 0.1) inset;
-  }
-  
-  .navbar-links a.active {
-    color: #66fcf1;
-    background: linear-gradient(135deg, rgba(102, 252, 241, 0.2) 0%, rgba(77, 225, 215, 0.15) 100%);
-    border-color: rgba(102, 252, 241, 0.4);
-    text-shadow: 0 0 20px rgba(102, 252, 241, 0.8);
-    box-shadow: 
-      0 6px 20px rgba(102, 252, 241, 0.3),
-      0 0 0 1px rgba(102, 252, 241, 0.2) inset;
+{% extends "base.html" %}
+{% block title %}Upload - CORSS{% endblock %}
+{% block body %}
+<style>
+  html, body { background:#111f2e; min-height:100vh; min-width:100vw; margin:0; padding:0; font-family:'Inter',sans-serif; overflow:hidden; }
+  body { opacity:1; transition:opacity .6s cubic-bezier(.5,.04,.27,1); }
+  .bg-blur-img{ position:fixed; inset:0; width:100vw; height:100vh; z-index:0; object-fit:cover; filter:brightness(.53) blur(2px) grayscale(8%); pointer-events:none; }
+  .bg-overlay{ position:fixed; inset:0; width:100vw; height:100vh; background:linear-gradient(120deg,rgba(20,40,70,.82) 60%, rgba(10,36,70,.91) 100%); z-index:1; pointer-events:none; }
+
+  .navbar{ position:fixed; top:0; left:0; width:100vw; height:90px; background:linear-gradient(90deg,#13191faa 80%,#2a355688); backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,.08); display:flex; align-items:center; justify-content:space-between; padding:0 30px; box-sizing:border-box; z-index:1002; }
+  .navbar-brand img{ height:60px; width:auto; cursor:pointer; }
+  .navbar-links a{ margin-left:20px; font-weight:600; font-size:1rem; color:#fff; text-decoration:none; line-height:90px; transition:color .2s; }
+  .navbar-links a:hover{ color:#66fcf1; text-shadow:0 0 10px #66fcf1cc; }
+  .navbar-links a.active{ color:#fff; }
+
+  .dashboard-main{ position:absolute; top:90px; left:0; width:100vw; height:calc(100vh - 90px); display:flex; gap:32px; z-index:1003; pointer-events:none; box-sizing:border-box; padding:18px 30px; }
+
+  .slot-card{ background:#23272e; color:#e4e7ef; box-shadow:0 6px 36px rgba(14,22,38,.29); min-width:390px; max-width:470px; width:400px; height:100%; display:flex; flex-direction:column; font-size:1.08rem; pointer-events:all; border:1.5px solid #222937; }
+  .slot-tabs{ display:flex; gap:7px; margin:6px 0 22px; }
+  .slot-tab-btn{ flex:1 1 0; background:#16181c; color:#8be0ff; font-size:1.07rem; font-weight:700; padding:12px 7px 9px; border:none; border-bottom:3.5px solid transparent; cursor:pointer; border-radius:9px 9px 0 0; transition:.2s; }
+  .slot-tab-btn.active{ background:#23272e; border-bottom-color:#8be0ff; box-shadow:0 3px 18px #00dbff0d; }
+  .slot-card-inner{ flex:1 1 auto; overflow-y:auto; padding:8px 22px 24px; display:flex; flex-direction:column; min-height:0; }
+  .slot-section{ display:none; } .slot-section.active{ display:block; }
+  .slot-card h3{ margin:0 0 20px; font-size:1.28rem; font-weight:800; color:#8be0ff; letter-spacing:.03em; border-bottom:1px solid #34415b; padding-bottom:10px; }
+  .slot-card label{ display:block; margin:12px 0 4px; font-weight:700; color:#b2cbf6; font-size:1.01rem; }
+  .slot-card input,.slot-card textarea,.slot-card select{ width:100%; border:1.3px solid #364763; border-radius:7px; padding:8px 10px; font-size:1.05rem; background:#1b2026; color:#e6e6ef; outline:none; transition:.13s; }
+  .slot-card input:focus,.slot-card textarea:focus,.slot-card select:focus{ box-shadow:0 0 0 2px #66fcf144; border-color:#66fcf1; }
+
+  .middle-card{ background:#242832; border-radius:22px; box-shadow:0 6px 28px rgba(18,25,45,.11); min-width:700px; max-width:940px; width:800px; height:100%; display:flex; flex-direction:column; pointer-events:all; overflow:hidden; }
+  .middle-img-block{ width:100%; display:flex; align-items:center; height:350px; justify-content:center; flex:1 1 0; min-height:220px; padding:38px 0 14px; position:relative; overflow:hidden; cursor:grab; }
+  .robot-image-container{ position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+  .robot-image{ max-width:100%; max-height:100%; object-fit:contain; }
+  .svg-overlay{ position:absolute; inset:0; pointer-events:auto; }
+  .svg-overlay svg{ width:100%; height:100%; }
+
+  .clickable-part{ fill:transparent; stroke:transparent; cursor:pointer; transition:fill .3s, stroke .3s; }
+  .clickable-part:hover{ fill:rgba(102,252,241,.2); stroke:rgba(102,252,241,.8); stroke-width:3; }
+  .clickable-part.active{ fill:rgba(102,252,241,.25)!important; stroke:rgba(102,252,241,.9)!important; stroke-width:3!important; }
+
+  .middle-global-block{ border-top:1.5px solid #303848; padding:25px 22px 14px; background:#21242b; display:flex; flex-direction:column; gap:16px; position:relative; }
+  .middle-global-row{ display:flex; gap:13px; }
+  .middle-global-block input,.middle-global-block select{ border:1.2px solid #364763; border-radius:7px; padding:9px 11px; font-size:1.06rem; background:#181c22; color:#f0f4fb; flex:1 1 0; outline:none; transition:.13s; }
+
+  .peek-btn{ position:absolute; right:18px; top:22px; background:#233043; color:#cdefff; border:1px solid #355070; border-radius:999px; padding:8px 11px; font-weight:900; cursor:pointer; font-size:1rem; line-height:1; z-index:3; }
+  .peek-btn:hover{ background:#2a3a53; }
+
+  /* 우측 카드 */
+  .card{ background:#262b33; box-shadow:0 6px 30px rgba(18,25,45,.14); min-width:290px; max-width:340px; width:295px; height:100%; display:flex; flex-direction:column; pointer-events:all; border:1.5px solid #23272e; }
+  .card-inner{ flex:1 1 auto; overflow-y:auto; padding:35px 32px 32px; display:flex; flex-direction:column; }
+  .card h3{ margin:0 0 16px; font-size:1.28rem; font-weight:800; color:#b2cbf6; letter-spacing:.02em; border-bottom:1px solid #34415b; padding-bottom:9px; }
+  .summary-box{ font-size:1.10rem; color:#d5e4f8; background:#23272e; border:1.3px solid #38405a; padding:19px 16px; min-height:100px; line-height:1.7; white-space:pre-wrap; }
+
+  @media (max-width:1100px){
+    .dashboard-main{ flex-direction:column; align-items:center; gap:16px; height:auto; padding-left:0; padding-right:0; }
+    .slot-card,.middle-card,.card{ width:98vw; max-width:98vw; min-height:370px; border-radius:10px !important; }
   }
 
-  .dashboard-main {
-    position: absolute;
-    top: 80px;
-    left: 0;
-    width: 100vw;
-    height: calc(100vh - 80px);
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: stretch;
-    gap: 32px;
-    z-index: 1003;
-    pointer-events: none;
-    box-sizing: border-box;
-    padding-left: 30px;
-    padding-right: 30px;
-    padding-top: 18px;
-    padding-bottom: 18px;
-  }
-  .slot-card {
-    background: #23272e;
-    color: #e4e7ef;
-    border-radius: 0;
-    box-shadow: 0 6px 36px 0 rgba(14, 22, 38, 0.29);
-    min-width: 390px;
-    max-width: 470px;
-    width: 400px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    font-size: 1.08rem;
-    pointer-events: all;
-    border: 1.5px solid #222937;
-    margin: 0;
-    box-sizing: border-box;
-  }
-  .slot-tabs {
-    display: flex;
-    gap: 7px;
-    margin-bottom: 22px;
-    margin-top: 6px;
-  }
-  .slot-tab-btn {
-    flex: 1 1 0;
-    background: #16181c;
-    color: #8be0ff;
-    font-size: 1.07rem;
-    font-weight: 700;
-    padding: 12px 7px 9px 7px;
-    border: none;
-    outline: none;
-    border-bottom: 3.5px solid transparent;
-    cursor: pointer;
-    border-radius: 9px 9px 0 0;
-    transition: background 0.19s, color 0.19s, border 0.22s;
-    letter-spacing: 0.03em;
-  }
-  .slot-tab-btn.active {
-    background: #23272e;
-    color: #8be0ff;
-    border-bottom: 3.5px solid #8be0ff;
-    box-shadow: 0 3px 18px #00dbff0d;
-    z-index: 2;
-  }
-  .slot-card-inner {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    padding: 8px 22px 24px 22px;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    box-sizing: border-box;
-  }
-  .slot-section { display: none; }
-  .slot-section.active { display: block; }
-  .slot-card h3 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.28rem;
-    font-weight: 800;
-    color: #8be0ff;
-    letter-spacing: 0.03em;
-    border-bottom: 1px solid #34415b;
-    padding-bottom: 10px;
-  }
-  .slot-card label {
-    display: block;
-    margin-bottom: 4px;
-    font-weight: 700;
-    color: #b2cbf6;
-    font-size: 1.01rem;
-    letter-spacing: 0.01em;
-    margin-top: 12px;
-  }
-  .slot-card select, .slot-card input, .slot-card textarea {
-    width: 100%;
-    border: 1.3px solid #364763;
-    border-radius: 7px;
-    padding: 8px 10px;
-    font-size: 1.05rem;
-    background: #1b2026;
-    color: #e6e6ef;
-    margin-bottom: 7px;
-    margin-top: 2px;
-    outline: none;
-    transition: box-shadow 0.13s, border 0.13s;
-  }
-  .slot-card select:focus, .slot-card input:focus, .slot-card textarea:focus {
-    box-shadow: 0 0 0 2px #66fcf144;
-    border-color: #66fcf1;
-  }
-  .middle-card {
-    background: #242832;
-    border-radius: 22px;
-    box-shadow: 0 6px 28px 0 rgba(18,25,45,0.11);
-    min-width: 700px;
-    max-width: 940px;
-    width: 800px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    pointer-events: all;
-    margin: 0;
-    box-sizing: border-box;
-    overflow: hidden;
-  }
-  .middle-img-block {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    height: 350px;
-    justify-content: center;
-    flex: 1 1 0;
-    min-height: 220px;
-    padding: 38px 0 14px 0;
-    position: relative;
-    overflow: hidden;
-    cursor: grab;
-  }
+  /* 모달 */
+  .modal{ display:none; position:fixed; z-index:5005; inset:0; background:rgba(20,36,40,.56); align-items:center; justify-content:center; }
+  .modal-content{ background:#23283a; padding:34px 28px 28px; border-radius:16px; box-shadow:0 8px 38px #13293966; min-width:340px; max-width:600px; width:100%; color:#f6fcff; display:flex; flex-direction:column; gap:12px; position:relative; animation:modalPop .3s; }
+  @keyframes modalPop{ 0%{ transform:scale(.85); opacity:0;} 100%{ transform:scale(1); opacity:1; } }
+  .modal-close{ position:absolute; right:17px; top:12px; font-size:1.7rem; color:#b2e7e0; cursor:pointer; font-weight:900; }
+  #modal-title{ font-size:1.2rem; color:#66fcf1; margin-bottom:8px;}
+  #modal-input{ font-size:1.04rem; border-radius:6px; border:1.5px solid #34415b; background:#202630; color:#fafcff; padding:10px; min-height:52px; resize:vertical; }
+  #modal-save{ margin-top:10px; padding:8px 12px; background:#66fcf1; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:1.07rem; }
 
-  /* 로봇 이미지와 SVG 오버레이 스타일 */
-  .robot-image-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  .debug-pill{ position:fixed; top:96px; right:28px; z-index:5006; background:rgba(102,252,241,.12); color:#c7f9ff; border:1px solid rgba(102,252,241,.4); border-radius:999px; padding:6px 12px; font-size:.92rem; display:none; }
+  .map-picker{ position:fixed; z-index:6000; background:#1c2330; border:1px solid #33425b; border-radius:10px; padding:10px; box-shadow:0 10px 30px rgba(0,0,0,.35); display:none; }
+  .map-picker h4{ margin:0 0 8px; font-size:.95rem; color:#8be0ff; }
+  .map-picker button{ display:block; width:100%; text-align:left; padding:8px 10px; margin:4px 0; background:#232b3a; border:1px solid #2f3b50; border-radius:8px; color:#e9f6ff; cursor:pointer; font-size:.95rem; }
+  .map-picker button:hover{ background:#2a364a; }
 
-  .robot-image {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-  }
+  .btn-row{ display:flex; gap:8px; margin-top:10px; }
+  .btn{ background:#66fcf1; color:#0b161b; border:none; border-radius:8px; padding:8px 12px; font-weight:800; cursor:pointer; }
+  .btn.secondary{ background:#33425b; color:#e9f6ff; }
 
-  .svg-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events:auto;;
+  /* ===== JSON 미리보기 팝업 (컨테이너 블러 전용) ===== */
+  .json-peek-wrap{
+    position:fixed; z-index:6005;
+    left:50%; top:50%; transform:translate(-50%,-50%) scale(.96);
+    width:min(90vw, 820px); height:min(70vh, 520px);
+    opacity:0; transition:opacity .16s ease, transform .16s ease;
   }
+  .json-peek-wrap.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  .json-peek-wrap.hide{ opacity:0; transform:translate(-50%,-50%) scale(.96); }
 
-  .svg-overlay svg {
-    width: 100%;
-    height: 100%;
+  .json-peek-blurred{
+    position:absolute; inset:0;
+    background:#17202c; color:#e7f6ff; border:1px solid #31425c; border-radius:16px;
+    box-shadow:0 18px 60px rgba(0,0,0,.55);
+    padding:16px 18px; overflow:auto;
+    font-family:ui-monospace, Menlo, Consolas, monospace; font-size:1rem; white-space:pre-wrap;
+    transition:filter .12s ease, opacity .12s ease;
   }
+  /* 생성 중일 때 이 콘텐츠만 블러 */
+  .json-peek-wrap.generating .json-peek-blurred{ filter:blur(6px); }
 
-  /* 클릭 가능한 영역 스타일 */
-  .clickable-part { 
-    fill: transparent;
-    stroke: transparent;
-    cursor: pointer; 
-    pointer-events: all;
-    transition: all 0.4s cubic-bezier(.25,.46,.45,.94);
-    filter: drop-shadow(0 0 0 transparent);
+  /* 팝업 위 텍스트 오버레이 (블러 영향 없음) */
+  .json-peek-overlay{
+    position:absolute; inset:0; display:none; align-items:center; justify-content:center; pointer-events:none;
+    font-weight:900; font-size:1.15rem; color:#eaf6ff;
+    text-shadow:0 2px 14px rgba(0,0,0,.55), 0 0 8px rgba(102,252,241,.35);
   }
-  .clickable-part.active {
-  box-shadow: none !important;
-  border-color: inherit !important;
-  fill: inherit !important;
-  stroke: inherit !important;
-  stroke-width: inherit !important;
-  transition: none !important;
-}
-  .clickable-part:hover { 
-    fill: rgba(102, 252, 241, 0.2);
-    stroke: rgba(102, 252, 241, 0.8);
-    stroke-width: 3;
-    filter: drop-shadow(0 0 10px #66fcf1);
-    transform: scale(1.02);
-  }
-
- 
-
-  /* 디버그 모드용 - 필요시 활성화 */
-  .debug-mode .clickable-part {
-    fill: rgba(255, 0, 0, 0.2);
-    stroke: red;
-    stroke-width: 2;
-  }
-
-
-  .middle-global-block {
-    border-top: 1.5px solid #303848;
-    padding: 25px 22px 14px 22px;
-    background: #21242b;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .middle-global-block label {
-    font-size: 1.10rem;
-    color: #b2cbf6;
-    font-weight: 700;
-    margin-bottom: 7px;
-  }
-  .middle-global-row {
-    display: flex;
-    gap: 13px;
-    margin-bottom: 3px;
-  }
-  .middle-global-block select,
-  .middle-global-block input {
-    border: 1.2px solid #364763;
-    border-radius: 7px;
-    padding: 9px 11px;
-    font-size: 1.06rem;
-    background: #181c22;
-    color: #f0f4fb;
-    flex: 1 1 0;
-    outline: none;
-    transition: box-shadow 0.13s, border 0.13s;
-  }
-  .middle-global-block select:focus,
-  .middle-global-block input:focus {
-    box-shadow: 0 0 0 2px #62d8fd49;
-    border-color: #66fcf1;
-  }
-  .card {
-    background: #262b33;
-    border-radius: 0;
-    box-shadow: 0 6px 30px 0 rgba(18,25,45,0.14);
-    min-width: 290px;
-    max-width: 340px;
-    width: 295px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    pointer-events: all;
-    margin: 0;
-    box-sizing: border-box;
-    overflow: hidden;
-    border: 1.5px solid #23272e;
-  }
-  .card-inner {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    padding: 35px 32px 32px 32px;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    box-sizing: border-box;
-  }
-  .card h3 {
-    margin-top: 0;
-    margin-bottom: 16px;
-    font-size: 1.28rem;
-    font-weight: 800;
-    color: #b2cbf6;
-    letter-spacing: 0.02em;
-    border-bottom: 1px solid #34415b;
-    padding-bottom: 9px;
-  }
-  .summary-box {
-    font-size: 1.10rem;
-    color: #d5e4f8;
-    background: #23272e;
-    border-radius: 0;
-    border: 1.3px solid #38405a;
-    padding: 19px 16px;
-    margin-top: 14px;
-    min-height: 100px;
-    font-family: 'Inter', sans-serif;
-    line-height: 1.7;
-  }
-  @media (max-width: 1100px) {
-    .dashboard-main {
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      height: auto;
-      min-height: unset;
-      padding-left: 0;
-      padding-right: 0;
-    }
-    .slot-card, .middle-card, .card {
-      width: 98vw;
-      max-width: 98vw;
-      min-width: 0;
-      height: auto;
-      min-height: 370px;
-      max-height: unset;
-      margin: 0 0 16px 0;
-      border-radius: 10px !important;
-    }
-    .middle-img-block svg {
-      width: 180px;
-      height: 180px;
-    }
-  }
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 5005;
-    left: 0; top: 0; width: 100vw; height: 100vh;
-    background: rgba(20,36,40,0.56);
-    align-items: center; justify-content: center;
-  }
-  .modal-content {
-    background: #23283a;
-    padding: 34px 28px 28px 28px;
-    border-radius: 16px;
-    box-shadow: 0 8px 38px #13293966;
-    min-width: 340px;
-    max-width: 600px;
-    width: 100%; 
-    color: #f6fcff;
-    display: flex; flex-direction: column;
-    gap: 12px;
-    position: relative;
-    animation: modalPop .3s;
-  }
-  @keyframes modalPop {
-    0% { transform: scale(0.85); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-  .modal-close {
-    position: absolute;
-    right: 17px; top: 12px;
-    font-size: 1.7rem;
-    color: #b2e7e0;
-    cursor: pointer;
-    z-index: 10;
-    font-weight: 900;
-    transition: color 0.18s;
-  }
-  .modal-close:hover { color: #f08282; }
-  #modal-title { font-size: 1.2rem; color: #66fcf1; margin-bottom: 8px;}
-  #modal-input {
-    font-size: 1.04rem; border-radius: 6px; border:1.5px solid #34415b;
-    background: #202630; color:#fafcff; padding: 10px; margin-bottom: 2px; resize: vertical;
-    min-height: 52px;
-  }
-  #modal-save {
-    margin-top:10px; padding:8px 12px; background:#66fcf1; border:none; border-radius:6px;
-    font-weight:700; cursor:pointer; font-size: 1.07rem;
-    transition: background 0.2s;
-  }
-  #modal-save:hover { background: #52d8d0; }
-
-  /* 디버그 토글 버튼 */
-  .debug-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    background: #66fcf1;
-    color: #000;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    z-index: 9999;
-    display: none; /* 기본적으로 숨김 */
-  }
-  </style>
-
+  .json-peek-wrap.generating .json-peek-overlay{ display:flex; }
+  .json-peek-overlay .dot{ width:6px; height:6px; border-radius:50%; background:#66fcf1; margin-left:8px; animation:bounce .9s infinite ease-in-out; }
+  @keyframes bounce{ 0%,100%{ transform:translateY(0)} 50%{ transform:translateY(-5px)} }
+</style>
 
 <img class="bg-blur-img" src="{{ url_for('static', filename='images/back3.jpg') }}">
 <div class="bg-overlay"></div>
+
 <div class="navbar">
   <div class="navbar-brand">
     <img src="{{ url_for('static', filename='images/CORSS_logo_checked.png') }}" alt="CORSS Logo" class="navbar-logo">
   </div>
   <div class="navbar-links">
-    <a href="/" class="active">Home</a>
+    <a href="/">Home</a>
     <a href="/upload">Upload</a>
     <a href="/about">About</a>
     <a href="/contact">Contact</a>
   </div>
 </div>
 
+<div class="debug-pill" id="debug-pill">Debug: -</div>
+<div class="map-picker" id="map-picker"><h4 id="picker-title">Re-map segment</h4></div>
+
 <div class="dashboard-main">
-  <!-- 왼쪽: Slot Control -->
+  <!-- 좌측: Slot Control -->
   <div class="slot-card">
     <div class="slot-tabs">
       <button class="slot-tab-btn active" data-tab="control">Action Control</button>
       <button class="slot-tab-btn" data-tab="style">Style Detail</button>
     </div>
     <div class="slot-card-inner">
-      <!-- 동작 컨트롤 - 자동생성 -->
       <div class="slot-section section-control active">
         <h3>Slot Control</h3>
-        {% for i in range(1, 17) %}
-          <label for="segment-{{i}}">Segment {{i}}</label>
-          <input type="text" id="segment-{{i}}" placeholder="동작 설명을 입력하세요">
-        {% endfor %}
+        <label for="upper-arm">Upper Arm (shoulder_pitch)</label>
+        <input type="text" id="upper-arm" placeholder="예: 0s:2°, 0.4s:10°, 1.0s:15°">
+        <label for="elbow-joint">Elbow Joint (elbow_pitch)</label>
+        <input type="text" id="elbow-joint" placeholder="예: 0s:-3°, 0.4s:-8°, 1.0s:-12°">
+        <label for="wrist">Wrist (wrist_pitch)</label>
+        <input type="text" id="wrist" placeholder="예: 0.1s:-5°, 0.6s:8°, 1.2s:12°">
+        <label for="gripper">Gripper (open_ratio 0~1)</label>
+        <input type="text" id="gripper" placeholder="예: 0s:0.85, 0.8s:0.35, 1.1s:0.20">
+        <label for="base-yaw">Base Yaw (base_yaw)</label>
+        <input type="text" id="base-yaw" placeholder="예: 0s:0°, 0.6s:8.5°, 1.2s:7°">
+        <label for="path-1">Path 1 (EE Cartesian waypoints)</label>
+        <textarea id="path-1" rows="3" placeholder='예: 0s:[0.00,0.10,0.00], 0.6s:[0.06,0.12,0.02], 1.1s:[0.10,0.12,0.03]'></textarea>
       </div>
-      <!-- 스타일 디테일 -->
+
       <div class="slot-section section-style">
         <h3>Style Detail</h3>
         <label for="color">Color Theme</label>
-        <select id="color">
-          <option>Classic Black</option>
-          <option>Industrial Grey</option>
-          <option>Neon Blue</option>
-        </select>
+        <select id="color"><option>Classic Black</option><option>Industrial Grey</option><option>Neon Blue</option></select>
         <label for="effect">Effect Preset</label>
-        <select id="effect">
-          <option>Soft Shadow</option>
-          <option>Metallic Glow</option>
-        </select>
+        <select id="effect"><option>Soft Shadow</option><option>Metallic Glow</option></select>
         <label for="detail-notes">Custom Notes</label>
         <textarea id="detail-notes" placeholder="설정 설명, 스타일 참고사항 등 입력"></textarea>
       </div>
     </div>
   </div>
 
-  <!-- 중앙: 로봇 이미지 + 글로벌 세팅 -->
-<div class="middle-card">
-  <div class="middle-img-block" id="robot-area">
-    <div style="position: absolute; top: 12px; right: 18px; z-index: 20;">
-      <button id="zoom-in" style="
-        background: #66fcf1; 
-        color: #000; 
-        border: none; 
-        width: 35px; 
-        height: 35px; 
-        border-radius: 6px; 
-        font-size: 1.35rem; 
-        font-weight: bold; 
-        margin-right: 4px; 
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-      " 
-      onmouseover="this.style.background='#4de1d7'" 
-      onmouseout="this.style.background='#66fcf1'">＋</button>
-      <button id="zoom-out" style="
-        background: #66fcf1; 
-        color: #000; 
-        border: none; 
-        width: 35px; 
-        height: 35px; 
-        border-radius: 6px; 
-        font-size: 1.35rem; 
-        font-weight: bold; 
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-      "
-      onmouseover="this.style.background='#4de1d7'" 
-      onmouseout="this.style.background='#66fcf1'">－</button>
-    </div>
-    <div class="robot-image-container" id="robot-img-container" style="position: relative;">
-      <img src="{{ url_for('static', filename='images/arm2.png') }}" 
-          alt="Robot Arm" 
-          class="robot-image" 
-          style="width:100%; height:auto; display:block;">
-      <div class="svg-overlay">
-        {% include 'svg/processing_seg_named_parts_linked.svg' %}
+  <!-- 중앙: 이미지 + SVG + Global -->
+  <div class="middle-card">
+    <div class="middle-img-block" id="robot-area">
+      <div style="position:absolute; top:12px; right:18px; z-index:20;">
+        <button id="zoom-in" style="font-size:1.35rem; margin-right:4px;">＋</button>
+        <button id="zoom-out" style="font-size:1.35rem;">－</button>
+      </div>
+      <div class="robot-image-container" id="robot-img-container">
+        <img src="{{ url_for('static', filename='images/arm2.png') }}" alt="Robot Arm" class="robot-image">
+        <div class="svg-overlay">
+          {% include 'svg/processing_seg_named_parts_linked.svg' %}
+        </div>
       </div>
     </div>
-  </div>
-    <!-- 글로벌 세팅 -->
-    <div class="middle-global-block">
+
+    <div class="middle-global-block" id="global-block">
+      <button class="peek-btn" id="btn-peek" title="Quick JSON preview (auto hide)">➜</button>
       <label>Global Settings</label>
       <div class="middle-global-row">
-        <input type="text" value="0.5 m/s">
-        <select><option>factory</option></select>
+        <input type="number" id="gs-fps" value="24" min="1" step="1" placeholder="fps">
+        <input type="number" id="gs-duration" value="2.0" min="0.1" step="0.1" placeholder="duration (s)">
+        <select id="gs-units"><option value="metric" selected>metric</option><option value="imperial">imperial</option></select>
       </div>
       <div class="middle-global-row">
-        <select><option>isometric</option></select>
-        <select><option>isometric</option></select>
+        <input type="text" id="gs-video" value="@uploaded.robotarm1_futuristic.mp4" placeholder="input video token">
+        <select id="gs-tracker"><option value="xmem" selected>xmem</option><option value="fastsam">fastsam</option></select>
+      </div>
+      <div class="middle-global-row">
+        <input type="number" id="gs-speed" value="120" step="1" placeholder="speed_limit_deg_s">
+        <input type="number" id="gs-blend" value="0.01" step="0.001" placeholder="blend_radius_m">
       </div>
     </div>
   </div>
 
-  <!-- 오른쪽: Final Summary -->
+  <!-- 오른쪽: Summary + Export -->
   <div class="card">
     <div class="card-inner">
       <h3>Final Summary</h3>
-      <div class="summary-box" id="summary-box">
-        <!-- segment별 요약 자동 생성됨 -->
+      <div class="summary-box" id="summary-box">상태: 준비됨</div>
+      <div class="btn-row">
+        <button class="btn" id="btn-export">Export Plan JSON</button>
+        <button class="btn secondary" id="btn-copy">Copy</button>
       </div>
     </div>
   </div>
+</div>
+
+<!-- Next Page Button -->
+<div style="text-align: center; margin: 40px 0 20px 0;">
+  <a href="/workflow-designer" class="page-link" style="display: inline-block; background: linear-gradient(135deg, #66fcf1, #10b981); color: #111f2e; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(102, 252, 241, 0.3);">
+    Continue to Workflow Designer →
+  </a>
 </div>
 
 <!-- 모달 -->
@@ -654,283 +224,229 @@
   </div>
 </div>
 
-<!-- 디버그 모드 토글 버튼 (개발시에만 사용) -->
-<button class="debug-toggle" onclick="toggleDebugMode()">Toggle Debug</button>
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    // 1. 탭 토글
-    const tabBtns = document.querySelectorAll('.slot-tab-btn');
-    const sections = document.querySelectorAll('.slot-section');
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        tabBtns.forEach(b => b.classList.remove('active'));
-        sections.forEach(s => s.classList.remove('active'));
-        btn.classList.add('active');
-        if (btn.dataset.tab === "control") {
-          document.querySelector('.section-control').classList.add('active');
-        } else {
-          document.querySelector('.section-style').classList.add('active');
-        }
-      });
-    });
-  
-    // 2. 모달 변수
-    const modal = document.getElementById('detail-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const modalInput = document.getElementById('modal-input');
-    let currentTarget = null;
-    let currentPart = null;
-  
-    // 3. SVG 클릭 바인딩 (최초 및 새로 들어올 때마다)
-    function bindSvgEvents() {
-      const overlayObject = document.querySelector('.svg-overlay');
-      if (!overlayObject) {
-        console.log('[DEBUG] .svg-overlay가 없음!');
-        return;
-      }
-      // SVG 내부 clickable-part 디버깅
-      const clickableParts = overlayObject.querySelectorAll('.clickable-part');
-      console.log(`[DEBUG] .svg-overlay 안 clickable-part 개수: ${clickableParts.length}`);
-      clickableParts.forEach(part => {
-        // 기존 핸들러 제거
-        part.onclick = null;
-        part.addEventListener('click', (e) => {
-          e.stopPropagation();
-          // 디버그: 클릭한 path, data-target, 연결된 input
-          const targetId = part.dataset.target;
-          const partName = part.dataset.partName || targetId;
-          const linkedInput = document.getElementById(targetId);
-          console.log('[DEBUG] SVG clicked:', {
-            part: part,
-            dataTarget: targetId,
-            partName: partName,
-            linkedInput: linkedInput
-          });
-  
-          if (currentPart) currentPart.classList.remove('active');
-          part.classList.add('active');
-          currentPart = part;
-  
-          currentTarget = linkedInput;
-          // 입력창 하이라이트 + 모달 표시
-          if (currentTarget) {
-            currentTarget.classList.add('highlight');
-            currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => currentTarget.classList.remove('highlight'), 1400);
-  
-            modalTitle.textContent = `Detail Settings for ${partName}`;
-            modalInput.value = currentTarget.value || "";
-            modal.style.display = 'flex';
-            modalInput.focus();
-          } else {
-            // 디버그: 연결 input 없음
-            console.warn(`[DEBUG] 연결된 input(id="${targetId}")이 존재하지 않음!`);
-          }
-        });
-      });
-  
-      // 추가: data-target과 input id 일치하는지 전체 디버깅
-      clickableParts.forEach(part => {
-        const targetId = part.dataset.target;
-        const inputElem = document.getElementById(targetId);
-        if (!inputElem) {
-          console.warn(`[DEBUG][WARN] SVG path의 data-target="${targetId}"에 해당하는 input이 없음!`);
-        } else {
-          // 일치하는 경우만 출력 (optional)
-          console.log(`[DEBUG] SVG path data-target="${targetId}" <--> input#${targetId} OK`);
-        }
-      });
-    }
-  
-    // 4. svg-overlay 안에 svg 등장 감지 → 클릭 바인딩
-    const overlay = document.querySelector('.svg-overlay');
-    if (overlay) {
-      const observer = new MutationObserver(() => {
-        console.log('[DEBUG] MutationObserver: svg-overlay 자식 변경 감지!');
-        bindSvgEvents();
-      });
-      observer.observe(overlay, { childList: true, subtree: true });
-    }
-  
-    // 5. 최초 한 번 바인딩 시도 (즉시 렌더된 경우 대비)
-    bindSvgEvents();
-  
-    // 6. 모달 닫기
-    document.getElementById('modal-close').onclick = () => {
-      modal.style.display = 'none';
-      if (currentPart) currentPart.classList.remove('active');
-    };
-  
-    // 7. 모달 저장
-    document.getElementById('modal-save').onclick = () => {
-      if (currentTarget) {
-        currentTarget.value = modalInput.value;
-        updateSummary();
-      }
-      modal.style.display = 'none';
-      if (currentPart) currentPart.classList.remove('active');
-    };
-  
-    // 8. 배경 클릭 시 모달 닫기
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-        if (currentPart) currentPart.classList.remove('active');
-      }
-    };
-  
-    // 9. Summary 업데이트 함수 (segment-1~16 자동반영)
-    function updateSummary() {
-      let summary = '';
-      for (let i = 1; i <= 16; i++) {
-        const input = document.getElementById(`segment-${i}`);
-        if (input) summary += `Segment ${i}: ${input.value}<br>`;
-      }
-      document.getElementById('summary-box').innerHTML = summary;
-    }
-  
-    // 10. 입력 변경 시 Summary 갱신 (자동)
-    const inputs = document.querySelectorAll('input[type="text"], textarea');
-    inputs.forEach(input => {
-      input.addEventListener('input', updateSummary);
-    });
-  
-    // 11. 디버그 모드 토글
-    document.querySelector('.debug-toggle')?.addEventListener('click', () => {
-      document.querySelector('.robot-image-container').classList.toggle('debug-mode');
-    });
-  
-    // 12. [휠로 확대/축소 + 드래그 이동(패닝)]
-    let zoom = 1;
-    let posX = 0, posY = 0;
-    let isDragging = false;
-    let startX = 0, startY = 0;
-    let originX = 0, originY = 0;
-    const robotImgContainer = document.getElementById('robot-img-container');
+document.addEventListener("DOMContentLoaded", () => {
+  /* ===== 탭 전환 ===== */
+  const tabBtns = document.querySelectorAll('.slot-tab-btn');
+  const sections = document.querySelectorAll('.slot-section');
+  tabBtns.forEach(btn => btn.addEventListener('click', () => {
+    tabBtns.forEach(b => b.classList.remove('active'));
+    sections.forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    (btn.dataset.tab === "control" ? document.querySelector('.section-control') : document.querySelector('.section-style')).classList.add('active');
+  }));
 
-  function updateTransform() {
-    robotImgContainer.style.transform =
-      `scale(${zoom}) translate(${posX / zoom}px, ${posY / zoom}px)`;
-    robotImgContainer.style.transition = isDragging ? "none" : "transform 0.18s";
+  /* ===== 모달 ===== */
+  const modal = document.getElementById('detail-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalInput = document.getElementById('modal-input');
+  let currentTarget = null, currentPart = null;
+
+  /* ===== 입력창 id ===== */
+  const VALID_IDS = ["upper-arm","elbow-joint","wrist","gripper","base-yaw","path-1"];
+  const INPUT_LABEL = {
+    "upper-arm":"Shoulder Pitch (Upper Arm)",
+    "elbow-joint":"Elbow Pitch",
+    "wrist":"Wrist Pitch",
+    "gripper":"Gripper",
+    "base-yaw":"Base Yaw",
+    "path-1":"Path 1 (EE Waypoints)"
+  };
+
+  /* ===== 기본 매핑 & 오버라이드 ===== */
+  const DEFAULT_MAP = {
+    "segment-1":"upper-arm","segment-2":"elbow-joint","segment-3":"wrist",
+    "segment-4":"gripper","segment-5":"base-yaw","segment-6":"path-1",
+    "segment-7":null,"segment-8":null,"segment-9":null,"segment-10":null,
+    "segment-11":null,"segment-12":null,"segment-13":null,"segment-14":null,"segment-15":null,"segment-16":null
+  };
+  const LS_KEY = "segmentMapV1";
+  const loadOverride = ()=>{ try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch(e){ return {}; } };
+  const saveOverride = (ov)=> localStorage.setItem(LS_KEY, JSON.stringify(ov || {}));
+  const getMap = ()=>{ const ov = loadOverride(); const map = {...DEFAULT_MAP, ...ov}; for(const k in map){ if(map[k] && !VALID_IDS.includes(map[k])) map[k]=null; } return map; };
+
+  /* ===== 매핑 선택 팝업 ===== */
+  const picker = document.getElementById('map-picker');
+  function openPicker(segKey,x,y){
+    picker.innerHTML = '<h4>Re-map '+segKey+'</h4>';
+    [...VALID_IDS, null].forEach(id=>{
+      const b = document.createElement('button');
+      b.textContent = id ? (INPUT_LABEL[id]||id) : 'Disable (ignore)';
+      b.onclick = ()=>{ const ov=loadOverride(); ov[segKey]=id||null; saveOverride(ov); bindSvgEvents(); picker.style.display='none'; };
+      picker.appendChild(b);
+    });
+    picker.style.left=(x+8)+'px'; picker.style.top=(y+8)+'px'; picker.style.display='block';
+  }
+  document.addEventListener('click', e=>{ if(!picker.contains(e.target)) picker.style.display='none'; });
+
+  /* ===== SVG 바인딩 (Alt + 클릭 / 길게) ===== */
+  function bindSvgEvents(){
+    const map = getMap();
+    const overlay = document.querySelector('.svg-overlay'); if(!overlay) return;
+    overlay.querySelectorAll('.clickable-part').forEach(part=>{
+      part.onclick = part.onmousedown = part.onmouseup = part.onmouseleave = null;
+      const segKey = (part.getAttribute('data-target') || part.id || "").trim().toLowerCase();
+      const mappedId = map[segKey] || null;
+      const titleText = mappedId ? (INPUT_LABEL[mappedId]||mappedId) : "(ignored)";
+      part.setAttribute('title', `${titleText}\n(Alt+Click 또는 길게 누르면 재매핑)`);
+      part.style.pointerEvents = "auto";
+
+      part.addEventListener('click', (e)=>{
+        if(e.altKey || !mappedId){ openPicker(segKey, e.clientX, e.clientY); return; }
+        const linked = document.getElementById(mappedId);
+        if(!linked){ openPicker(segKey, e.clientX, e.clientY); return; }
+        if(currentPart) currentPart.classList.remove('active');
+        part.classList.add('active'); currentPart = part;
+        currentTarget = linked; linked.classList.add('highlight');
+        linked.scrollIntoView({behavior:'smooth', block:'center'}); setTimeout(()=>linked.classList.remove('highlight'), 1200);
+        modalTitle.textContent = `Detail Settings for ${titleText} (#${mappedId})`;
+        modal.style.display='flex'; modalInput.value = linked.value || ""; modalInput.focus();
+      });
+
+      let pressTimer=null;
+      part.addEventListener('mousedown', e=>{
+        if(e.altKey){ openPicker(segKey, e.clientX, e.clientY); return; }
+        pressTimer=setTimeout(()=>openPicker(segKey, e.clientX, e.clientY), 450);
+      });
+      part.addEventListener('mouseup', ()=> clearTimeout(pressTimer));
+      part.addEventListener('mouseleave', ()=> clearTimeout(pressTimer));
+    });
   }
 
-  if (robotImgContainer) {
-    // 휠 줌
-    robotImgContainer.addEventListener('wheel', function(e) {
-      if (e.ctrlKey) return;
-      e.preventDefault();
-      const delta = e.deltaY || e.wheelDeltaY;
-      const oldZoom = zoom;
-      if (delta < 0) {
-        zoom = Math.min(zoom + 0.07, 2.8);
-      } else {
-        zoom = Math.max(zoom - 0.07, 0.5);
-      }
-      // 마우스 위치 중심 줌(선택)
-      // posX와 posY를 마우스 기준으로 보정하려면 아래처럼 쓰면 됨
-      const rect = robotImgContainer.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      const zoomDelta = zoom - oldZoom;
-      posX -= (mouseX - posX) * (zoomDelta / zoom);
-      posY -= (mouseY - posY) * (zoomDelta / zoom);
-      updateTransform();
-    }, { passive: false });
+  /* ===== 모달 저장/닫기 ===== */
+  document.getElementById('modal-close').onclick = ()=>{ modal.style.display='none'; if(currentPart) currentPart.classList.remove('active'); };
+  document.getElementById('modal-save').onclick = ()=>{ if(currentTarget){ currentTarget.value = modalInput.value; } modal.style.display='none'; if(currentPart) currentPart.classList.remove('active'); };
+  window.onclick = (e)=>{ if(e.target==modal){ modal.style.display='none'; if(currentPart) currentPart.classList.remove('active'); } };
 
-    // 드래그 시작
-    robotImgContainer.addEventListener('mousedown', function(e) {
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      originX = posX;
-      originY = posY;
-      robotImgContainer.style.cursor = 'grabbing';
-    });
-
-    // 드래그 이동
-    window.addEventListener('mousemove', function(e) {
-      if (!isDragging) return;
-      posX = originX + (e.clientX - startX);
-      posY = originY + (e.clientY - startY);
-      updateTransform();
-    });
-
-    // 드래그 종료
-    window.addEventListener('mouseup', function() {
-      if (isDragging) {
-        isDragging = false;
-        robotImgContainer.style.cursor = '';
-        robotImgContainer.style.transition = "transform 0.15s";
-      }
-    });
-
-    // 모바일(터치) 지원: 터치 줌/이동은 필요시 추가
+  /* ===== 줌/패닝 ===== */
+  let zoom=1, posX=0, posY=0, isDragging=false, startX=0, startY=0, originX=0, originY=0;
+  const robotImgContainer = document.getElementById('robot-img-container');
+  function updateTransform(){ robotImgContainer.style.transform = `scale(${zoom}) translate(${posX/zoom}px, ${posY/zoom}px)`; robotImgContainer.style.transition = isDragging?"none":"transform .18s"; }
+  if(robotImgContainer){
+    robotImgContainer.addEventListener('wheel', e=>{ if(e.ctrlKey) return; e.preventDefault(); const old=zoom; zoom = (e.deltaY<0)?Math.min(zoom+.07,2.8):Math.max(zoom-.07,.5); const r=robotImgContainer.getBoundingClientRect(); const mx=e.clientX-r.left, my=e.clientY-r.top; const dz=zoom-old; posX -= (mx-posX)*(dz/zoom); posY -= (my-posY)*(dz/zoom); updateTransform(); }, {passive:false});
+    robotImgContainer.addEventListener('mousedown', e=>{ isDragging=true; startX=e.clientX; startY=e.clientY; originX=posX; originY=posY; robotImgContainer.style.cursor='grabbing'; });
+    window.addEventListener('mousemove', e=>{ if(!isDragging) return; posX = originX + (e.clientX - startX); posY = originY + (e.clientY - startY); updateTransform(); });
+    window.addEventListener('mouseup', ()=>{ if(isDragging){ isDragging=false; robotImgContainer.style.cursor=''; robotImgContainer.style.transition="transform .15s"; } });
+    document.getElementById('zoom-in').onclick = ()=>{ zoom=Math.min(zoom+.1,3); updateTransform(); };
+    document.getElementById('zoom-out').onclick = ()=>{ zoom=Math.max(zoom-.1,.5); updateTransform(); };
   }
-  document.addEventListener("DOMContentLoaded", function() {
-  document.body.classList.add("fade-in");
 
-  // React Bits 애니메이션 초기화
-  if (typeof ReactBitsAnimations !== 'undefined') {
-    console.log('Initializing React Bits animations...');
-    
-    // 자동 글로우 효과 적용
-    document.querySelectorAll('.auto-glow').forEach(el => {
-      el.classList.add('glow-text');
-    });
-    
-    // 타이프라이터 효과 적용
-    document.querySelectorAll('.auto-typewriter').forEach(el => {
-      ReactBitsAnimations.typeWriter(el, {
-        speed: 80,
-        cursor: false
-      });
-    });
-    
-    // 리플 효과 적용
-    document.querySelectorAll('.auto-ripple, .btn, button').forEach(btn => {
-      ReactBitsAnimations.addRipple(btn);
-    });
-    
-    // 파티클 배경 생성
-    setTimeout(() => {
-      ReactBitsAnimations.createParticleBackground(document.body, {
-        particleCount: 15,
-        speed: 20,
-        particleColor: 'rgba(102, 252, 241, 0.3)'
-      });
-    }, 500);
-    
-    console.log('React Bits animations initialized');
-  } else {
-    console.warn('ReactBitsAnimations not found');
+  /* ===== Plan JSON 빌더 ===== */
+  function buildPlanJSON(){
+    const meta = {
+      fps: Number(document.getElementById('gs-fps').value) || 24,
+      duration: Number(document.getElementById('gs-duration').value) || 2.0,
+      units: document.getElementById('gs-units').value || "metric",
+      input_video: document.getElementById('gs-video').value || "@uploaded.robotarm.png",
+      tracker: document.getElementById('gs-tracker').value || "xmem",
+      speed_limit_deg_s: Number(document.getElementById('gs-speed').value) || 120,
+      blend_radius_m: Number(document.getElementById('gs-blend').value) || 0.01
+    };
+
+    const labels = "Upper Arm,Elbow Joint,Wrist,Gripper,Base Yaw,Path 1";
+
+    const plan = [
+      { step:1, agent_name:"SegmenterSAM2", description:"Segment robot parts from the uploaded video (background excluded).",
+        inputs:{ input_video: meta.input_video, target_labels: labels }, outputs:{ masks:"@1.masks" } },
+      { step:2, agent_name:"MaskTracker", description:"Track and stabilize masks across frames.",
+        inputs:{ masks:"@1.masks", tracker: meta.tracker }, outputs:{ tracked_masks:"@2.tracked_masks" } },
+      { step:3, agent_name:"RigMapper", description:"Bind segments to joints/DOF with axes and limits.",
+        inputs:{ labels:"Upper Arm, Elbow Joint, Wrist, Gripper, Base Yaw", tracked_masks:"@2.tracked_masks" }, outputs:{ rig_map:"@3.rig_map" } },
+      { step:4, agent_name:"MotionEstimator", description:"Estimate joint angles, gripper open_ratio, and EE path from video.",
+        inputs:{ video: meta.input_video, rig_map:"@3.rig_map", tracked_masks:"@2.tracked_masks", fps: meta.fps },
+        outputs:{ joint_curves:"@4.joint_curves", gripper_curve:"@4.gripper_curve", ee_path:"@4.ee_path" } },
+      { step:5, agent_name:"MotionRefiner", description:"Convert curves to keyframes with easing; enforce speed/accel limits.",
+        inputs:{ joint_curves:"@4.joint_curves", gripper_curve:"@4.gripper_curve", ee_path:"@4.ee_path", speed_limit_deg_s: meta.speed_limit_deg_s, blend_radius_m: meta.blend_radius_m },
+        outputs:{ keyframes:"@5.keyframes" } },
+      { step:6, agent_name:"PlanAssembler", description:"Assemble motion-only plan JSON per segment (no background).",
+        inputs:{ keyframes:"@5.keyframes", rig_map:"@3.rig_map", meta }, outputs:{ motion_plan:"@6.motion_plan" } },
+      { step:7, agent_name:"PromptEmitter", description:"Emit compact textual prompt summary (optional for competition).",
+        inputs:{ motion_plan:"@6.motion_plan", negative:"motion blur,flicker,pixelation,over-saturation,artifacting" },
+        outputs:{ prompt_text:"@7.prompt_text" } }
+    ];
+
+    return { meta, plan };
   }
-});
-    // 최초 summary 렌더
-    updateSummary();
 
-    // 13. [확대/축소 버튼 이벤트 추가]
-    const zoomInBtn = document.getElementById('zoom-in');
-    const zoomOutBtn = document.getElementById('zoom-out');
+  /* ===== 상태 & 액션 ===== */
+  const summaryBox = document.getElementById('summary-box');
+  let lastPlan = null;
+  const setStatus = (t)=> summaryBox.textContent = t;
 
-    if (zoomInBtn) {
-      zoomInBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        zoom = Math.min(zoom + 0.2, 3.0);
-        updateTransform();
-        console.log('Zoom in:', zoom);
-      });
-    }
+  document.getElementById('btn-copy').addEventListener('click', async ()=>{
+    const payload = lastPlan || buildPlanJSON();
+    lastPlan = payload;
+    try{ await navigator.clipboard.writeText(JSON.stringify(payload, null, 2)); alert('Plan JSON 복사 완료!'); }
+    catch{ alert('복사 실패 — 브라우저 권한 확인'); }
+  });
 
-    if (zoomOutBtn) {
-      zoomOutBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        zoom = Math.max(zoom - 0.2, 0.3);
-        updateTransform();
-        console.log('Zoom out:', zoom);
-      });
+  document.getElementById('btn-export').addEventListener('click', ()=>{
+    const payload = lastPlan || buildPlanJSON();
+    lastPlan = payload;
+    try{
+      sessionStorage.setItem('latestPlan', JSON.stringify(payload));
+      sessionStorage.setItem('latestPlanAt', String(Date.now()));
+      window.location.href = "/workflow-designer";
+    }catch(e){
+      alert('세션 저장 실패. 팝업 차단/스토리지 정책 확인');
     }
   });
-  </script>
-  
-{% endblock %}
 
+  /* ===== 팝업: 컨테이너 블러 + 오버레이 텍스트 ===== */
+  const btnPeek = document.getElementById('btn-peek');
+  btnPeek.addEventListener('click', ()=>{
+    const payload = buildPlanJSON();
+    lastPlan = payload;
+    setStatus("Plan 생성 완료 ✓");
+
+    // 팝업 래퍼(overlay 텍스트는 래퍼에, blur는 내부 컨테이너에만 적용)
+    const wrap = document.createElement('div');
+    wrap.className = 'json-peek-wrap show generating';
+
+    const panel = document.createElement('div');
+    panel.className = 'json-peek-blurred';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'json-peek-overlay';
+    overlay.innerHTML = 'Plan 생성중<span class="dot"></span>';
+
+    wrap.appendChild(panel);
+    wrap.appendChild(overlay);
+    document.body.appendChild(wrap);
+
+    // 스트리밍 출력 (패널 내용만 주르르, 패널은 blur 상태)
+    const text = JSON.stringify(payload, null, 2);
+    let i = 0;
+    const CHUNK_PER_FRAME = 24; // 속도 조절
+    function stream(){
+      if(i < text.length){
+        panel.textContent += text.slice(i, i + CHUNK_PER_FRAME);
+        i += CHUNK_PER_FRAME;
+        panel.scrollTop = panel.scrollHeight;
+        requestAnimationFrame(stream);
+      }else{
+        // 완료 후 바로 닫힘(800ms 대기)
+        setTimeout(()=> closePeek(), 800);
+      }
+    }
+    requestAnimationFrame(stream);
+
+    // 닫기 로직
+    function closePeek(){
+      if(!document.body.contains(wrap)) return;
+      wrap.classList.add('hide');
+      setTimeout(()=> wrap.remove(), 160);
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('mousedown', onClickAway);
+    }
+    function onKey(e){ if(e.key === 'Escape') closePeek(); }
+    function onClickAway(e){ if(!wrap.contains(e.target)) closePeek(); }
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('mousedown', onClickAway);
+  });
+
+  /* ===== init ===== */
+  bindSvgEvents();
+});
+</script>
+{% endblock %}
